@@ -1,0 +1,6 @@
+css=static/style.css
+input_img=static/sleepy.jpg
+nclases=3
+network_img=static/red.jpg
+nimg=380
+prediccion=tensor(1)
