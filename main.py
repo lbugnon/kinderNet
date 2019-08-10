@@ -10,46 +10,60 @@ app.config["TEMPLATES_AUTORELOAD"] = True
 
 @app.route('/')
 def main():
- 
-    params=load_config("config")
+    """
+    Pantalla de bienvenida e inicialiación.
+    """
+    params=load_config("static/config")
+    shutil.rmtree("data/",ignore_errors=True)
+    os.mkdir("data/")
+    save_config(params,"data/config")
 
-    return render_template('index.html',**params)
+    shutil.copyfile("static/white-noise.jpg","data/pic.jpg")
+    
+    return render_template('index.html')
+
+@app.route('/kindernet')
+def application():
+    """
+    Interfaz principal donde se muestra la red y se producen las interacciones. 
+    """
+    params=load_config()
+       
+    return render_template('network.html',**params)
 
 @app.route('/entrenar<int:objclass>')
 def train(objclass):
     """
     Entrena el modelo con la última figura y la clase dentro del request form. 
     """
-    params=edit_config({"input_img": "static/sleepy.jpg"},"config")
+
+    params=load_config()
     # codigos del teclado, 49=>0
     objclass-=49
-    im=take_pic()
 
-    print("entrenando %d" %objclass)
-    # TODO Entrenamiento...
-    net=KinderNet(int(params["nclases"])) # Levanta los archivos que tenga o empieza de 0, pasa la imagen y guarda los estados.
-    
-    loss=net.run(im,objclass,train_mode=True)
-    print(loss)
-    net.save()
+    print("entra entrenar %d" %objclass)
+
+    # im=take_pic()
+    # print("entrenando %d" %objclass)
+    # net=KinderNet(int(params["nclases"]))     
+    # loss=net.run(im,objclass,train_mode=True)
+    # ## TODO el loss se podria mostrar en la misma pagina, algo que se pueda ocultar despues
+    # print(loss)
+    # net.save()
     
     return "ok"
 
 @app.route('/changeOut<int:nclases>')
 def changeOut(nclases):
     params=load_config()
+    if nclases==90:
+        params["nclases"]=2
+    if nclases==88:
+        params["nclases"]=3
+
     print(params)
     print(nclases)
-    if nclases==90:
-        params["nclases"]=int(params["nclases"])-1
-        if params["nclases"]<1:
-            params["nclases"]=1
-    if nclases=="88":
-        print(params["nclases"])
-        params["nclases"]=int(params["nclases"])+1
-        if params["nclases"]>3:
-            params["nclases"]=3
-
+    
     save_config(params)
 
     return "ok"

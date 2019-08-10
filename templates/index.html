@@ -3,113 +3,24 @@
 <head>
   <!-- <meta charset="UTF-8"> -->
   <title>KinderNet</title>
-  <link rel="stylesheet" type="text/css" href="static/style.css">
 </head>
 <body>
 
-  {{mode}} {{prediccion}}
-  
-  <div class="container">
-    <div class="row">
-      <div class="column">
-	<img src={{input_img}} style="width:80%">
-      </div>
-      <div class="column">
-	<img src={{network_img}} style="width:100%">
-      </div>
-      <div class="column">
-	<div class="row">
-	  <div class="keys">
-	    {% for class in range(nclases | int) %}
-	    <div data-key={{class+49}} class="key">
-	      <kbd>{{class+1}}</kbd>
-	    </div>
-	    {% endfor %}
-	    {% for class in range(nclases | int) %}
-	    <audio data-key={{class+49}} src="static/sounds/tink.wav"></audio>
-	    {% endfor %}
-	  </div>
-	</div>
-	
-      </div>
-    </div>
+  Pantalla de bienvenida
 
-    <div class="row">
-      <div class="controls">
-	<div class="column">
-	  <div data-key="90" class="key">
-	    <kbd>Menos salidas</kbd>
-	  </div>
-	  <audio data-key="90" src="static/sounds/tink.wav"></audio>
-	</div>
-	<div class="column">
-	  <div data-key="88" class="key">
-	    <kbd>Mas salidas</kbd>
-	  </div>
-	  <audio data-key="88" src="static/sounds/tink.wav"></audio>
-	</div>
-	<div class="column">
-	  <div data-key="67" class="key">
-	    <kbd>Clasificar</kbd>
-	  </div>
-	  <audio data-key="67" src="static/sounds/tink.wav"></audio>
-	</div>
 
-      </div>
-    </div>
-  </div>
-  
-  
-  
+
   <script>
-    
-  function train(e){
-  const audio= document.querySelector(`audio[data-key='${e.keyCode}']`);
-  const key= document.querySelector(`.key[data-key='${e.keyCode}']`);
-  if(!audio) return;
-  audio.currentTime=0;
+   
 
-  // llama al metodo para entrenar clase elegida
-  audio.play()
-  <!-- $.post("/entrenar",{ class: '1'}); -->
-  key.classList.add('playing')
-
-  var request = new XMLHttpRequest();
-  request.onload = function(){
-  //alert(request.responseText);
-  };
-  if (e.keyCode<67){
-		  request.open("GET","/entrenar"+e.keyCode,true);
-		  }
-  if (e.keyCode==67){
-		  request.open("GET","/predecir",true);
-		  }
-  if (e.keyCode>67){
-		  request.open("GET","/changeOut"+e.keyCode,true);
-		  }
-		  
-		  
-  request.send();
-
-  window.location.reload()
-
-  }
-  
-  window.addEventListener('keydown',train);
-
- 
-  function removeTransition(e){
-  if(e.propertyName !== 'transform') return;
-  this.classList.remove('playing')
-   // object is the key  
-  }
-  
-  const keys=document.querySelectorAll('.key');
-  keys.forEach(key => key.addEventListener('transitionend',removeTransition));
-
+    <!-- continuar a la siguiente pagina al presionar una tecla -->
+    function enter(e){
+    window.location.replace("/kindernet")
+    }    
+    window.addEventListener('keydown',enter);
 
   </script>
-
+  
 
 </body>
 </html>
