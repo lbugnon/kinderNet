@@ -5,7 +5,6 @@ import shutil,os,io
 from kinderNet import KinderNet
 import numpy as np
 from PIL import Image
-import cv2 as cv
 import base64
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # Cache en horas
