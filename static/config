@@ -1,6 +1,7 @@
-css=static/style.css
 input_img=data/pic.jpg
-nclases=1
+nclases=2
 network_img=static/red.jpg
-nimg=0
+model_dir=data/
+nimages=0
 prediccion=0
+netsize=0

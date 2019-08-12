@@ -3,11 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 import os
+from torchvision import transforms 
 
 class KinderNet(nn.Module):
-    def __init__(self,nclasses):
+    def __init__(self,params):
         super(KinderNet, self).__init__()
 
+        nclases=int(params["nclases"])
+        self.model_dir=params["model_dir"]
+        
         filters=[12,24,32]
         model=[]
         for k,f in enumerate(filters):
@@ -25,7 +29,7 @@ class KinderNet(nn.Module):
         #model.append(nn.Conv2d(filt_out,1,kernel_size=1))
         model.append(nn.AdaptiveAvgPool2d(1))
         self.model = nn.Sequential(*model)
-        self.linear= nn.Linear(filt_out,nclasses)
+        self.linear= nn.Linear(filt_out,nclases)
                          
         
         self.optimizer=torch.optim.Adam([{"params": self.model.parameters(),"lr": 1e-4},{"params":self.linear.parameters(),"lr": 1e-4}])        
@@ -38,29 +42,48 @@ class KinderNet(nn.Module):
         x=self.linear(x.squeeze().unsqueeze(0))
         return x
 
-    def run(self,im,label,train_mode):
-
-        if os.path.isfile("static/model.par"):
-            self.load_state_dict(torch.load("static/model.par"))
+    def run(self,im,label=0,train_mode=False):
+        """
+        Realiza una iteración con el modelo, sea para entrenar o evaluar.
         
+        :param im: Imagen de entrada de la clase PIL.Image
+        :param label: Etiqueta de la clase a entrenar. En predicción se ignora
+        :param train_mode: Booleano que indica si se va a entrenar o se hará predicción.
+        
+        :returns: Valor de la función de costo (loss) en caso de train_mode = True, sino devuelve la clase estimada. 
+        """
+        # TODO: ver si hay alguna forma de tener una "variable global" en el servidor; para esta aplicacion paraece que no hay problema de bajar y subir del disco
+        if os.path.isfile(self.model_dir+"model.par"):
+            self.load_state_dict(torch.load(self.model_dir+"model.par"))
         
         self.train(train_mode)
         if train_mode:
             self.optimizer.zero_grad()
         
-        im=torch.tensor(im).permute(2,0,1).unsqueeze(0).float()
+        im=transforms.ToTensor()(im.convert("RGB")).unsqueeze(0).float()
         
         out=self.forward(Variable(im))
-        print("etiqueta",label,"salida",out)
 
+        
         if train_mode:
             label=torch.tensor([label],dtype=torch.long)
             loss=self.criterion(out,Variable(label)) 
             loss.backward()
             self.optimizer.step()
+
+            # debug
+            print("Modo train; etiqueta ",int(label),"salida ",out.detach().tolist())
+
             return loss.item()
-        return torch.argmax(out)
+
+        # debug
+        output=int(torch.argmax(out.detach()))
+        print("Modo test; salida ",out.tolist(), "clase ",output )
+        
+        return output
+
+    
     def save(self):
 
-        torch.save(self.state_dict(),"static/model.par")
+        torch.save(self.state_dict(),self.model_dir+"model.par")
             

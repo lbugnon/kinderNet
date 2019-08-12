@@ -2,44 +2,86 @@
 # Leandro Bugnon (lbugnon@sinc.unl.edu.ar)
 # sinc(i) - http://sinc.unl.edu.ar/
 # ======================================================
-def load_config(filename="data/config"):
+class ConfigManager():
+    """
+    Modulo simple para mantener estados durante la ejecucion. Eventualmente se puede pasar a una DB.
+    """
+    # def __init__(self,conf_dir,config=None):
+    #     self.conf_dir=conf_dir
 
-    config={}
-    for line in  open(filename):
-        if line[0]=="#":
-            continue
+    #     if config is not None:
+    #         params=self.load_config(config)
+    #         self.save_config(params)
+
+    @classmethod
+    def load_config(cls,filename=None):
+
+        if filename is None:
+            filename="data/config"
+
+        config={}
+        for line in  open(filename):
+            if line[0]=="#":
+                continue
         
-        line=line.strip().split("=")
-        if len(line)!=2:
-            continue
+            line=line.strip().split("=")
+            if len(line)!=2:
+                continue
 
-        val=line[1]
+            val=line[1]
 
-        comment_ind=val.find("#")
-        if comment_ind != -1:
-            val=val[:comment_ind]
-        config[line[0]]=val
+            comment_ind=val.find("#")
+            if comment_ind != -1:
+                val=val[:comment_ind]
+            config[line[0]]=val
     
-
-    return config
+        return config
     
-def save_config(config,filename="data/config"):
+    @classmethod
+    def save_config(cls,config,filename=None):
 
-    with open(filename,"w") as fout:
-        for k in sorted(config.keys()):
-            fout.write("%s=%s\n" %(k,config[k]))
+        if filename is None:
+            filename="data/config"
 
-def edit_config(params,filename="data/config"):
-    """
-    Levanta los parametros de configuración, edita los indicados en "params"
- y guarda el archivo.
-    """
-    parameters = load_config(filename)
+        with open(filename,"w") as fout:
+            for k in sorted(config.keys()):
+                fout.write("%s=%s\n" %(k,config[k]))
 
-    for p in params.keys():
-        parameters[p] = params[p]
 
-    print(parameters)
-    save_config(parameters,filename)
+    @classmethod
+    def edit_config(cls,params,filename=None):
+        """
+        Levanta los parametros de configuración, edita los indicados en "params"
+        y guarda el archivo.
+        """
+        if filename is None:
+            filename="data/config"
+            
+        parameters = cls.load_config(filename)
 
-    return parameters
+        for p in params.keys():
+            parameters[p] = params[p]
+
+        cls.save_config(parameters,filename)
+
+        return parameters
+
+    @classmethod
+    def clear_config(cls,filename=None):
+        """
+        Retear algunas configuraciones temporales. Los parametros relacionados a la arquitectura de la red y direcciones locales no se modifican.
+        """
+        if filename is None:
+            filename="data/config"
+
+        parameters = cls.load_config(filename)
+
+        for p in parameters.keys():
+            if "nimages" in p: 
+                parameters[p] = 0
+
+        cls.save_config(parameters,filename)
+
+
+
+            

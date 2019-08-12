@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- <meta charset="UTF-8"> -->
+  <meta charset="UTF-8">
   <title>KinderNet</title>
   <link rel="stylesheet" type="text/css" href="static/style.css">
 </head>
 <body>
-  
+
+
   <div class="container">
+
+    <p id="loss"> </p>
+
+    <p id="ej0" style="color:red"> </p>
+    <p id="ej1" style="color:blue"> </p>
+    <p id="ej2" style="color:green"> </p>
+
+    <p id="pred"></p>
+    
     <div class="row">
       <div class="column">
 	<video autoplay style="width:80%"></video>
+	<canvas id="snapshot" width=320 height=240></canvas>
 	<!-- <img src={{input_img}} style="width:80%"> -->
       </div>
       <div class="column">
@@ -59,66 +70,7 @@
   </div>
   
   
-  <script>
-
-    
-    <!-- control de compatibilidad video -->
-    function hasGetUserMedia() {
-    return !!(navigator.mediaDevices &&
-    navigator.mediaDevices.getUserMedia);
-    }
-    
-    if (hasGetUserMedia()) {
-    // Good to go!
-    } else {
-    alert('Este navegador no soporta el display de video');
-    }
-
-    <!-- solicitud de permisos para video -->
-    const video = document.querySelector('video');
-    navigator.mediaDevices.getUserMedia({video: true}).
-    then((stream) => {video.srcObject = stream});    
-
-    <!-- evento para entrenar una clase -->
-    function train(e){
-    const audio= document.querySelector(`audio[data-key='${e.keyCode}']`);
-    const key= document.querySelector(`.key[data-key='${e.keyCode}']`);
-    if(!audio) return;
-    audio.currentTime=0;
-
-    // llama al metodo para entrenar clase elegida
-    audio.play()
-    key.classList.add('playing')
-    
-    var request = new XMLHttpRequest();
-    request.onload = function(){
-    //alert(request.responseText);
-    };
-    if (e.keyCode<67){
-		    request.open("GET","/entrenar"+e.keyCode,true);
-		    }
-		    if (e.keyCode==67){
-		    request.open("GET","/predecir",true);
-		    }
-		    if (e.keyCode>67){
-      request.open("GET","/changeOut"+e.keyCode,true);
-      window.location.reload()
-      }
-      request.send();
-      }
-      
-      window.addEventListener('keydown',train);
-
-      function removeTransition(e){
-      if(e.propertyName !== 'transform') return;
-      this.classList.remove('playing')
-      // object is the key  
-      }
-  
-      const keys=document.querySelectorAll('.key');
-      keys.forEach(key => key.addEventListener('transitionend',removeTransition));
-
-  </script>
+  <script src="static/app.js"></script>
 
 
 </body>

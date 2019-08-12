@@ -1,24 +1,36 @@
-from flask import Flask, render_template, request, url_for, redirect
-from webcam import take_pic
-from config_manager import save_config,load_config,edit_config
-import shutil,os
+from flask import Flask, render_template, request, url_for, redirect, jsonify, make_response
+# from flask_restful import Api, Resource
+from config_manager import ConfigManager as cm
+import shutil,os,io
 from kinderNet import KinderNet
-
+import numpy as np
+from PIL import Image
+import cv2 as cv
+import base64
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0 # Cache en horas
 app.config["TEMPLATES_AUTORELOAD"] = True
 
+
+# api=Api(app)
+# class train(Resource): # TODO: conviene hacer un solo objeto con el metodo (train,test?) o es un Train y un Test?
+#     def post(self): 
+#         return {'image': 'a_file', 'class': 0}
+# api.add_resource(train, '/train')
+
+# if __name__ == '__main__':
+#     app.run()
+    
 @app.route('/')
 def main():
     """
-    Pantalla de bienvenida e inicialiación.
+    Pantalla de bienvenida e inicialización.
     """
-    params=load_config("static/config")
     shutil.rmtree("data/",ignore_errors=True)
     os.mkdir("data/")
-    save_config(params,"data/config")
 
-    shutil.copyfile("static/white-noise.jpg","data/pic.jpg")
+    #cm("data/","static/config")
+    shutil.copyfile("static/config","data/config")
     
     return render_template('index.html')
 
@@ -27,62 +39,80 @@ def application():
     """
     Interfaz principal donde se muestra la red y se producen las interacciones. 
     """
-    params=load_config()
+    params=cm.load_config()
        
     return render_template('network.html',**params)
 
-@app.route('/entrenar<int:objclass>')
-def train(objclass):
+
+def dataurl2np(dataurl):
     """
-    Entrena el modelo con la última figura y la clase dentro del request form. 
+    Funcion auxiliar para convertir los datos de imagen codificados a un PIL Image. 
     """
+    data=dataurl.split(";")[1].split(",")[1]
+    image_bytes = io.BytesIO(base64.b64decode(data))
+    im = Image.open(image_bytes)
+    return im
 
-    params=load_config()
-    # codigos del teclado, 49=>0
-    objclass-=49
+@app.route('/entrenar', methods=["POST"])
+def train():
+    """
+    Entrena el modelo con la foto y clase recibida. 
+    """
+    req = request.get_json()
+    objclass=req["clase"]
+    img=dataurl2np(req["img"])
 
-    print("entra entrenar %d" %objclass)
+    params=cm.load_config()
 
-    # im=take_pic()
-    # print("entrenando %d" %objclass)
-    # net=KinderNet(int(params["nclases"]))     
-    # loss=net.run(im,objclass,train_mode=True)
-    # ## TODO el loss se podria mostrar en la misma pagina, algo que se pueda ocultar despues
-    # print(loss)
-    # net.save()
+    net=KinderNet(params)     
+    loss=net.run(img,objclass,train_mode=True)
+    net.save()
+
+    cname="nimages_%d" %objclass
+    if cname in params:
+        params[cname]=int(params[cname])+1
+    else:
+        params[cname]=1
+        
+    cm.save_config(params) 
+
+    res = jsonify({"loss": loss,"nimages": params["nimages_%d" %objclass]})
+    return make_response(res, 200) 
+
+@app.route('/clasificar', methods=["POST"])
+def classify():
+    """
+    Clasifica la imagen recibida, y devuelve su clase. 
+    """
+    req = request.get_json()
+    img=dataurl2np(req["img"])
     
-    return "ok"
-
-@app.route('/changeOut<int:nclases>')
-def changeOut(nclases):
-    params=load_config()
-    if nclases==90:
-        params["nclases"]=2
-    if nclases==88:
-        params["nclases"]=3
-
-    print(params)
-    print(nclases)
+    net=KinderNet(cm.load_config())     
+    out=net.run(img)
     
-    save_config(params)
+    res = jsonify({"clase": int(out)})
+    return make_response(res, 200) 
 
-    return "ok"
 
-@app.route('/predecir')
-def predict():
+@app.route('/modificarRed', methods=["POST"])
+def changeOut():
     """
-    Captura una imagen y devuelve la clase predecida por el modelo. 
+    Modifica la complejidad y cantidad de salidas de la red. 
     """
-    params=load_config()
-    im=take_pic()
+    req = request.get_json()
 
-    net=KinderNet(int(params["nclases"]))
+    params=cm.edit_config({"nclases":req["nclases"], "netsize":req["netsize"]})
+
+    # TODO: modificar la red en función de "netsize" y "nclases"
+
+    # Borramos el modelo anterior
+    if os.path.exists("data/model.par"):
+       os.remove("data/model.par")
+    # Reset de estados
+    cm.clear_config()
     
-    out=net.run(im,[],train_mode=False) # prueba
-    print("salida: ",out)
-    edit_config({"prediccion":out})
-    main()
-    return "ok"
+    res = jsonify({"network_img": "TODO_url","nimages": params["nimages"]})
+    return make_response(res, 200) 
 
 
 @app.route('/about')
