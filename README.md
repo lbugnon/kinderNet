@@ -1,6 +1,8 @@
+##### [sinc(i)](http://www.sinc.unl.edu.ar) - Instituto de Investigación en Señales, Sistemas e Inteligencia Computacional.
 ## KinderNet
 Este repositorio es un proyecto de aplicación web para aprender redes neuronales con alumnos de primaria/secundaria mediante ejemplos. El objetivo es que la aplicación sea interactiva y puedan jugar y experimentar con el proceso de entrenamiento y prueba de algoritmos de aprendizaje automático. 
 
+Autores: L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C. Yones.   
 ### Instalación
 - Instalar los modulos de python con "python -m pip install --user -r requirements.txt"
 - en la carpeta del proyecto, "export FLASK_APP=main.py"
