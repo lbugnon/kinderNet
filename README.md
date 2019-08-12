@@ -4,8 +4,6 @@
 - Levantar el servidor con "python -m flask run", se puede ver en "http://127.0.0.1:5000/"
 
 ### TODO
-- Al final parece que con flask es mas facil, aun asi queda resolver algunas cosas para hacerlo mas dinamico.
-- Falta programar la prediccion
-- Hacer la red (lo que esta es una prueba rapida)
-- Cada tanto falla el jinja2 si las fotos van muy rapido, revisar
+- Ya esta funcionando el entrenamiento y test. Habria que ajustar el modelo para llegar a entrenar con pocos ejemplos. Evaluar si no es necesario hacer batches (por ahora se entrena de a 1 imagen). 
+- Interfaz, ordenar todo. Eventualmente se podría hacer en Aangular para agregar algunos menues, info del lab y demás 
 - hacer un paquete o subir a pythonanywhere
