@@ -1,0 +1,101 @@
+<!-- control de compatibilidad video -->
+    function hasGetUserMedia() {
+    return !!(navigator.mediaDevices &&
+    navigator.mediaDevices.getUserMedia);
+    }
+    
+    if (hasGetUserMedia()) {
+    // Good to go!
+    } else {
+    alert('Este navegador no soporta el display de video');
+    }
+
+    <!-- solicitud de permisos para video -->
+    var video = document.querySelector('video');
+    var snapshotCanvas = document.getElementById('snapshot');
+
+    var videoHandler= function(stream){
+    video.srcObject = stream;
+    };
+    
+    navigator.mediaDevices.getUserMedia({video: true}).
+    then(videoHandler);    
+
+    
+    <!-- evento para entrenar una clase -->
+    function train(e){
+
+    <!-- captura de snapshot -->
+    var context = snapshot.getContext('2d');
+    context.drawImage(video, 0, 0, snapshotCanvas.width,
+        snapshotCanvas.height);
+    var imgData    = snapshotCanvas.toDataURL("image/png");
+
+    <!-- var formData = new FormData(); -->
+    <!-- formData.append("file",imgData) -->
+    
+    <!-- TODO: mandar la img en el xmlhttpprequest de abajo -->
+    
+    <!-- efectos visuales y sonidos -->
+    const audio= document.querySelector(`audio[data-key='${e.keyCode}']`);
+    const key= document.querySelector(`.key[data-key='${e.keyCode}']`);
+    if(!audio) return;
+    audio.currentTime=0;
+    audio.play()
+    key.classList.add('playing')
+
+    <!-- usando fetch -->
+    var entry = {
+    clase: e.keyCode-49,
+    img: imgData
+    };
+
+    <!-- console.log("sstringify ") -->
+    <!-- console.log(JSON.stringify(entry)) -->
+    <!-- console.log("end ") -->
+    
+    fetch(`/entrenar`, {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify(entry),
+    cache: "no-cache",
+    headers: new Headers({
+    "content-type": "application/json"
+    })
+    })
+    .then(function(response){
+    response.json().then(function(json){
+    console.log(json);
+    });
+    });
+    
+    <!-- var request = new XMLHttpRequest(); -->
+    <!-- request.onload = function(){ -->
+    <!-- //alert(request.responseText); -->
+    <!-- }; -->
+    <!-- if (e.keyCode<67){ -->
+    <!-- 		    //request.open("GET","/entrenar"+e.keyCode,true); -->
+    <!-- 		    request.open("POST","/entrenar",true); -->
+    <!-- 		    } -->
+    <!-- 		    if (e.keyCode==67){ -->
+    <!-- 		    request.open("GET","/predecir",true); -->
+    <!-- 		    } -->
+    <!-- 		    if (e.keyCode>67){ -->
+    <!--   request.open("GET","/changeOut"+e.keyCode,true); -->
+    <!--   window.location.reload() -->
+    <!--   } -->
+    <!--   request.setRequestHeader('content-type', 'multipart/form-data'); -->
+    <!--   request.send(formData); -->
+
+    } 
+      
+      window.addEventListener('keydown',train);
+
+      function removeTransition(e){
+      if(e.propertyName !== 'transform') return;
+      this.classList.remove('playing')
+      // object is the key  
+      }
+  
+      const keys=document.querySelectorAll('.key');
+      keys.forEach(key => key.addEventListener('transitionend',removeTransition));
