@@ -4,16 +4,20 @@ Este repositorio es un proyecto de aplicación web para aprender sobre redes neu
 
 Autores (por orden alfabético): L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C. Yones.   
 ### Instalación
-- En caso de utilizar el gestor de paquetes pip, instalar los modulos de python con "python -m pip install --user -r requirements.txt"
-- 
+Se requiere tener python>=3.5 instalado. Desde la carpeta raiz del repositorio:
+- Utilizando el gestor de paquetes pip, instalar los modulos de python con "python -m pip install --user -r requirements.txt". Si se utiliza un gestor basado en Anaconda, instalar con "conda install --file requirements.txt". 
+- Instalar [node.js](https://nodejs.org/en/download/)
+- Instalar los paquetes necesarios para React con "npm --prefix front/ install react-scripts"
+
+En caso de que surjan errores en la instalación del paquete torch, seguir las instrucciones en [https://pytorch.org/](https://pytorch.org/).
+
 ## Levantar el servidor local (en "modo rápido")
-- (tal vez no es necesario) en la carpeta del proyecto, "export FLASK_APP=main.py". En Windows '$env:FLASK_APP = "main"'
 - Levantar el servidor con "python flask_server.py".
 - En otra consola, correr "npm start --prefix front/". La aplicación debería abrirse automáticamente en [http://localhost:3000](http://localhost:3000).
 
 
 ### TODO
+- Se podria montar en un servidor. Para uso local, React se puede integrar en Electron pero para correr python hay que hacerlo de otra manera (hay que reemplazar flask por el uso de la pc local)
 - Ya esta funcionando el entrenamiento y test. Habria que ajustar el modelo para llegar a entrenar con pocos ejemplos. Evaluar si no es necesario hacer batches (por ahora se entrena de a 1 imagen). 
-- Interfaz, ordenar los componentes y normalizar el template. Eventualmente se podría hacer en Angular para agregar algunos menues, info del lab y demás 
-- Revisar las teclas (quedaron muy juntas... se puede agregar un cartel de confirmación en las que borran todo)
-- hacer un paquete o subir a pythonanywhere
+- Interfaz, ordenar los componentes y normalizar el template. 
+- Se puede agregar un cartel de confirmación antes de resetear la red
