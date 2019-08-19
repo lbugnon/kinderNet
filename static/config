@@ -2,6 +2,6 @@ input_img=data/pic.jpg
 nclases=2
 network_img=static/red.jpg
 model_dir=data/
-nimages=0
+nsamples=0
 prediccion=0
 netsize=0

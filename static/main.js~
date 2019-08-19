@@ -1,6 +1,0 @@
-function enter(e){
-    if(e.keyCase!=13)
-	return;
-    window.location.replace("/kindernet")
-}    
-window.addEventListener('keydown',enter);
