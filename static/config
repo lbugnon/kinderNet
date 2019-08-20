@@ -1,7 +1,0 @@
-input_img=data/pic.jpg
-nclases=2
-network_img=static/red.jpg
-model_dir=data/
-nsamples=0
-prediccion=0
-netsize=0

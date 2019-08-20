@@ -9,7 +9,7 @@ class KinderNet(nn.Module):
     def __init__(self,params):
         super(KinderNet, self).__init__()
 
-        nclases=int(params["nclases"])
+        ncategories=int(params["ncategories"])
         self.model_dir=params["model_dir"]
         
         filters=[12,24,32]
@@ -29,7 +29,7 @@ class KinderNet(nn.Module):
         #model.append(nn.Conv2d(filt_out,1,kernel_size=1))
         model.append(nn.AdaptiveAvgPool2d(1))
         self.model = nn.Sequential(*model)
-        self.linear= nn.Linear(filt_out,nclases)
+        self.linear= nn.Linear(filt_out,ncategories)
                          
         
         self.optimizer=torch.optim.Adam([{"params": self.model.parameters(),"lr": 1e-4},{"params":self.linear.parameters(),"lr": 1e-4}])        

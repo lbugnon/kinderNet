@@ -15,7 +15,7 @@ class EventListener extends React.Component{
   }
 
 }
-
+const serverUrl = "http://localhost:5000/"
 // Kindernet ==========================================
 class KinderNet extends React.Component{
     constructor(props){
@@ -34,13 +34,25 @@ class KinderNet extends React.Component{
         this.webcam = webcam;
     };
 
+    componentDidMount() {
+        // Inicializa el modelo
+        fetch(serverUrl, {
+            method: "POST",
+            //credentials: "include",
+            cache: "no-cache",
+            headers: new Headers({"content-type": "application/json"})
+        }).then(response => response.json()).then(json => console.log("Init!"))
+
+
+    }
+
     captureGlobalEvent(e) {
         // entrenamiento
         if (this.state.categoryNames.includes(Number(e.key))) {
             const imgSrc = this.webcam.getScreenshot()
             this.setState({predict: false})
             this.setState({category: Number(e.key)-1})
-            const url = "http://localhost:5000/entrenar"
+            const url = serverUrl+"entrenar/"
 
             const entry = {
                 category: this.state.category,
@@ -51,7 +63,6 @@ class KinderNet extends React.Component{
                 method: "POST",
                 //credentials: "include",
                 body: JSON.stringify(entry),
-                cache: "no-cache",
                 headers: new Headers({"content-type": "application/json"})
             }).then(response => response.json()).then(json => this.setState({loss: json.loss, nsamples: json.nsamples}))
         }
@@ -61,7 +72,7 @@ class KinderNet extends React.Component{
             console.log("en test")
             const imgSrc = this.webcam.getScreenshot()
             this.setState({predict: true})
-            const url = "http://localhost:5000/clasificar"
+            const url = serverUrl+"clasificar/"
 
             const entry = {
                 imgSrc
@@ -71,28 +82,38 @@ class KinderNet extends React.Component{
                 method: "POST",
                 //credentials: "include",
                 body: JSON.stringify(entry),
-                cache: "no-cache",
                 headers: new Headers({"content-type": "application/json"})
             }).then(response => response.json()).then(json => this.setState({category: json.category}))
         }
 
         // Cambiar la cantidad de salidas
-        if (["a","z"].includes(e.key.toLowerCase())){
+        if (["a","z"].includes(e.key.toLowerCase())) {
             var categoryNames = this.state.categoryNames
             if (e.key.toLowerCase() === "z"){
-                categoryNames.pop()
-                this.setState({categoryNames})
-                console.log(this.state.categoryNames)
+                if (this.state.categoryNames.length > 2) {
+                    categoryNames.pop()
+                    this.setState({categoryNames})
+                } else
+                    return // Cantidad minima de salidas
             }
-            else{
-                categoryNames.push(Number(categoryNames[categoryNames.length-1])+1)
-                this.setState({categoryNames})
-                console.log(this.state.categoryNames)
+            if (e.key.toLowerCase() === "a") {
+                if (this.state.categoryNames.length < 5) {
+                    categoryNames.push(Number(categoryNames[categoryNames.length - 1]) + 1)
+                    this.setState({categoryNames})
+                } else
+                    return // Cantidad máxima de salidas
             }
-            // todo: mandar el nuevo estado al servidor y actualizar el dibujo
-            // Cambiar el tamaño de la red
-            if (e.key === "+"){
-            }
+            // todo:  actualizar el dibujo
+            var entry = {netSize: this.state.netSize, ncategories: this.state.categoryNames.length}
+            fetch(serverUrl + "modificarRed/", {
+                method: "POST",
+                body: JSON.stringify(entry),
+                headers: new Headers({"content-type": "application/json"})
+            }).then(response => response.json()).then(json => this.setState({network_img: json.network_img}))
+        }
+
+        // Cambiar el tamaño de la red
+        if (e.key === "+"){
         }
     }
     render(){
