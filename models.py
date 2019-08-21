@@ -54,7 +54,7 @@ class Train(Resource):
 
         json.dump(params, open(conf_file,"w"))
         
-        return {"loss": loss,"nsamples": params["nsamples"][objclass]}
+        return {"loss": loss,"nsamples": params["nsamples"]}
 
 # Modelo para predicción
 class Classify(Resource): 
@@ -104,5 +104,5 @@ class ChangeNet(Resource):
         if os.path.exists("data/model.par"):
             os.remove("data/model.par")
         
-        return {"network_img": "TODO_url"}
+        return {"network_img": "TODO_url", "nsamples": params["nsamples"]}
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Webcam from "react-webcam";
+const serverUrl = "http://localhost:5000/"
 
 // event listener
 class EventListener extends React.Component{
@@ -13,9 +14,21 @@ class EventListener extends React.Component{
   render(){
     return null;
   }
-
 }
-const serverUrl = "http://localhost:5000/"
+
+// SampleCounter ==========================================
+function SampleCounter(props){
+    var samplesList = props.nsamples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
+
+    //samplesList[props.category] = <b>{samplesList[props.category]}</b>
+
+    return(
+        <div className="SamplesList">
+            <ul>{samplesList}</ul>
+        </div>
+    );
+}
+
 // Kindernet ==========================================
 class KinderNet extends React.Component{
     constructor(props){
@@ -26,7 +39,7 @@ class KinderNet extends React.Component{
             netSize: 0, // mayor valor, mas compleja la red
             categoryNames: [1,2],
             loss: 0,
-            nsamples: 0 // nsamples de la clase actual durante el entrenamiento
+            nsamples: [0,0] // nsamples de la clase actual durante el entrenamiento
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
     }
@@ -89,13 +102,6 @@ class KinderNet extends React.Component{
         // Cambiar la cantidad de salidas
         if (["a","z"].includes(e.key.toLowerCase())) {
             var categoryNames = this.state.categoryNames
-            if (e.key.toLowerCase() === "z"){
-                if (this.state.categoryNames.length > 2) {
-                    categoryNames.pop()
-                    this.setState({categoryNames})
-                } else
-                    return // Cantidad minima de salidas
-            }
             if (e.key.toLowerCase() === "a") {
                 if (this.state.categoryNames.length < 5) {
                     categoryNames.push(Number(categoryNames[categoryNames.length - 1]) + 1)
@@ -103,13 +109,20 @@ class KinderNet extends React.Component{
                 } else
                     return // Cantidad máxima de salidas
             }
+            if (e.key.toLowerCase() === "z"){
+                if (this.state.categoryNames.length > 2) {
+                    categoryNames.pop()
+                    this.setState({categoryNames})
+                } else
+                    return // Cantidad minima de salidas
+            }
             // todo:  actualizar el dibujo
             var entry = {netSize: this.state.netSize, ncategories: this.state.categoryNames.length}
             fetch(serverUrl + "modificarRed/", {
                 method: "POST",
                 body: JSON.stringify(entry),
                 headers: new Headers({"content-type": "application/json"})
-            }).then(response => response.json()).then(json => this.setState({network_img: json.network_img}))
+            }).then(response => response.json()).then(json => this.setState({network_img: json.network_img, nsamples: json.nsamples}))
         }
 
         // Cambiar el tamaño de la red
@@ -129,10 +142,9 @@ class KinderNet extends React.Component{
                 className="Webcam"
                 //    videoConstraints={videoConstraints}
             />
-            <h3> Category names:  {this.state.categoryNames.toString()}, training {this.state.categoryNames[this.state.category].toString()}. predict: {this.state.predict.toString()} </h3>
-            <p> {this.state.loss}</p>
-            <p style={{color:"red"}}> {this.state.nsamples}</p>
-
+            <h3> predict: {this.state.predict.toString()} </h3>
+            <p> Loss: {this.state.loss}</p>
+            <SampleCounter category={this.state.category} nsamples={this.state.nsamples}/>_
         </div>
 
 

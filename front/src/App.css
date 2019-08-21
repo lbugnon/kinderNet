@@ -7,6 +7,15 @@
   borderRadius: 10px;
 }
 
+.sampleList li {
+  transition: all 0.4s ease-out;
+  opacity: 0;
+  height: 2em;
+}
+.sampleListShow li {
+  opacity: 1;
+}
+
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 40vmin;
