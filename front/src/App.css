@@ -7,12 +7,12 @@
   borderRadius: 10px;
 }
 
-.sampleList li {
+.sampleList{
   transition: all 0.4s ease-out;
   opacity: 0;
   height: 2em;
 }
-.sampleListShow li {
+.sampleListShow{
   opacity: 1;
 }
 

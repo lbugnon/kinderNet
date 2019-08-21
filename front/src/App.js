@@ -3,6 +3,16 @@ import './App.css';
 import Webcam from "react-webcam";
 const serverUrl = "http://localhost:5000/"
 
+
+// SampleCounter ==========================================
+function SampleCounter(props){
+    var samplesList = props.nsamples.map((n,i) => <li className={props.category == i ? "sampleListShow" : "sampleList"} key={i}>Ejemplos de la clase {i}: {n}</li>)
+
+    return(
+        <ul>{samplesList}</ul>
+    );
+}
+
 // event listener
 class EventListener extends React.Component{
   componentDidMount() {
@@ -16,18 +26,6 @@ class EventListener extends React.Component{
   }
 }
 
-// SampleCounter ==========================================
-function SampleCounter(props){
-    var samplesList = props.nsamples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
-
-    //samplesList[props.category] = <b>{samplesList[props.category]}</b>
-
-    return(
-        <div className="SamplesList">
-            <ul>{samplesList}</ul>
-        </div>
-    );
-}
 
 // Kindernet ==========================================
 class KinderNet extends React.Component{
