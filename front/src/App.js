@@ -1,12 +1,14 @@
 import React from 'react';
 import './App.css';
 import Webcam from "react-webcam";
-const serverUrl = "http://localhost:5000/"
 
+// Definiciones globales
+const serverUrl = "http://localhost:5000/"
+const minCategories = 2
+const maxCategories = 4
 
 // SampleCounter ==========================================
 function SampleCounter(props){
-    //var samplesList = props.nsamples.map((n,i) => <li className={props.category == i ? "sampleListShow" : "sampleList"} key={i}>Ejemplos de la clase {i}: {n}</li>)
     var samplesList = props.nsamples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
 
     return(
@@ -22,10 +24,6 @@ function Output(props){
         <button onTransitionEnd={props.onTransitionEnd} className={style}> Clase {props.value} </button>
 );
 }
-
-
-
-
 
 // event listener
 class EventListener extends React.Component{
@@ -56,6 +54,7 @@ class KinderNet extends React.Component{
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
         this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
+        this.serverCall = this.serverCall.bind(this);
     }
     setRef = webcam => {
         this.webcam = webcam;
@@ -71,69 +70,45 @@ class KinderNet extends React.Component{
         }).then(response => response.json()).then(json => console.log("Init!"))
     }
 
+    serverCall(url,entry){
+        fetch(serverUrl + url, {
+            method: "POST",
+            body: JSON.stringify(entry),
+            headers: new Headers({"content-type": "application/json"})
+        }).then(response => response.json()).then(json => this.setState(json))
+    }
+
     captureGlobalEvent(e) {
         // entrenamiento
         if (this.state.categoryNames.includes(Number(e.key))) {
             const imgSrc = this.webcam.getScreenshot()
-            this.setState({predict: false, category: Number(e.key)-1, outputOn: Number(e.key)-1})
-            const url = serverUrl+"entrenar/"
-
-            const entry = {
-                category: this.state.category,
-                imgSrc
-            }
-
-            fetch(url, {
-                method: "POST",
-                //credentials: "include",
-                body: JSON.stringify(entry),
-                headers: new Headers({"content-type": "application/json"})
-            }).then(response => response.json()).then(json => this.setState({loss: json.loss, nsamples: json.nsamples}))
+            const category = Number(e.key)-1
+            const entry = {category, imgSrc}
+            this.setState({predict: false, category , outputOn: Number(e.key)-1})
+            this.serverCall("entrenar/",entry)
         }
 
         // test
         if (e.key.toLowerCase() === "c") {
-            console.log("en test")
             const imgSrc = this.webcam.getScreenshot()
-            this.setState({predict: true})
-            const url = serverUrl+"clasificar/"
-
-            const entry = {
-                imgSrc
-            }
-
-            fetch(url, {
-                method: "POST",
-                //credentials: "include",
-                body: JSON.stringify(entry),
-                headers: new Headers({"content-type": "application/json"})
-            }).then(response => response.json()).then(json => this.setState({category: json.category}))
+            const entry = {imgSrc}
+            this.serverCall("clasificar/", entry)
+            this.setState({predict: true, outputOn: this.state.category})
         }
 
         // Cambiar la cantidad de salidas
         if (["a","z"].includes(e.key.toLowerCase())) {
-            var categoryNames = this.state.categoryNames
-            if (e.key.toLowerCase() === "a") {
-                if (this.state.categoryNames.length < 5) {
-                    categoryNames.push(Number(categoryNames[categoryNames.length - 1]) + 1)
-                    this.setState({categoryNames})
-                } else
-                    return // Cantidad máxima de salidas
-            }
-            if (e.key.toLowerCase() === "z"){
-                if (this.state.categoryNames.length > 2) {
-                    categoryNames.pop()
-                    this.setState({categoryNames})
-                } else
-                    return // Cantidad minima de salidas
-            }
-            // todo:  actualizar el dibujo
-            var entry = {netSize: this.state.netSize, ncategories: this.state.categoryNames.length}
-            fetch(serverUrl + "modificarRed/", {
-                method: "POST",
-                body: JSON.stringify(entry),
-                headers: new Headers({"content-type": "application/json"})
-            }).then(response => response.json()).then(json => this.setState({network_img: json.network_img, nsamples: json.nsamples}))
+            let categoryNames = this.state.categoryNames.slice()
+            if (e.key.toLowerCase() === "a")
+                categoryNames.push(Number(categoryNames[categoryNames.length - 1]) + 1)
+            if (e.key.toLowerCase() === "z")
+                categoryNames.pop()
+            if ( minCategories <=  categoryNames.length && categoryNames.length <= maxCategories)
+                this.setState({categoryNames})
+            const entry = {netSize: this.state.netSize, ncategories: this.state.categoryNames.length}
+            this.serverCall("modificarRed/",entry)
+             // TODO:  actualizar el dibujo
+
         }
 
         // Cambiar el tamaño de la red
@@ -150,7 +125,6 @@ class KinderNet extends React.Component{
         const Outputs = this.state.categoryNames.map((n, i) => <Output key = {i} value = {n}
                                                                        active = {i === this.state.outputOn}
                                                                        onTransitionEnd = {this.handleTransitionEnd}/>)
-
 
         return(
             <div>
