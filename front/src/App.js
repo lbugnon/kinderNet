@@ -6,24 +6,38 @@ const serverUrl = "http://localhost:5000/"
 
 // SampleCounter ==========================================
 function SampleCounter(props){
-    var samplesList = props.nsamples.map((n,i) => <li className={props.category == i ? "sampleListShow" : "sampleList"} key={i}>Ejemplos de la clase {i}: {n}</li>)
+    //var samplesList = props.nsamples.map((n,i) => <li className={props.category == i ? "sampleListShow" : "sampleList"} key={i}>Ejemplos de la clase {i}: {n}</li>)
+    var samplesList = props.nsamples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
 
     return(
         <ul>{samplesList}</ul>
     );
 }
 
+// Output ==========================================
+function Output(props){
+
+    const style = props.active ? "outputOn" : "output";
+    return (
+        <button onTransitionEnd={props.onTransitionEnd} className={style}> Clase {props.value} </button>
+);
+}
+
+
+
+
+
 // event listener
 class EventListener extends React.Component{
-  componentDidMount() {
-    window.addEventListener("keydown",this.props.onKeyDown)
-  }
-  componentWillUnmount() {
-    window.removeEventListener("keydown",this.props.onKeyDown)
-  }
-  render(){
-    return null;
-  }
+    componentDidMount() {
+        window.addEventListener("keyup",this.props.onKeyUp)
+    }
+    componentWillUnmount() {
+        window.removeEventListener("keyup",this.props.onKeyUp)
+    }
+    render(){
+        return null;
+    }
 }
 
 
@@ -32,14 +46,16 @@ class KinderNet extends React.Component{
     constructor(props){
         super(props);
         this.state={
-            category: 0,
+            category: -1,
             predict: false,
             netSize: 0, // mayor valor, mas compleja la red
             categoryNames: [1,2],
             loss: 0,
-            nsamples: [0,0] // nsamples de la clase actual durante el entrenamiento
+            nsamples: [0,0], // nsamples de la clase actual durante el entrenamiento
+            outputOn: -1
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
+        this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
     }
     setRef = webcam => {
         this.webcam = webcam;
@@ -53,16 +69,13 @@ class KinderNet extends React.Component{
             cache: "no-cache",
             headers: new Headers({"content-type": "application/json"})
         }).then(response => response.json()).then(json => console.log("Init!"))
-
-
     }
 
     captureGlobalEvent(e) {
         // entrenamiento
         if (this.state.categoryNames.includes(Number(e.key))) {
             const imgSrc = this.webcam.getScreenshot()
-            this.setState({predict: false})
-            this.setState({category: Number(e.key)-1})
+            this.setState({predict: false, category: Number(e.key)-1, outputOn: Number(e.key)-1})
             const url = serverUrl+"entrenar/"
 
             const entry = {
@@ -126,28 +139,42 @@ class KinderNet extends React.Component{
         // Cambiar el tamaño de la red
         if (e.key === "+"){
         }
+
     }
+
+    handleTransitionEnd(){
+        this.setState({outputOn: -1})
+    }
+
     render(){
-    return(
-        <div>
-            <EventListener onKeyDown={this.captureGlobalEvent}/>
-            <Webcam
-                audio={false}
-                height={300}
-                ref={this.setRef}
-                screenshotFormat="image/jpeg"
-                width={400}
-                className="Webcam"
-                //    videoConstraints={videoConstraints}
-            />
-            <h3> predict: {this.state.predict.toString()} </h3>
-            <p> Loss: {this.state.loss}</p>
-            <SampleCounter category={this.state.category} nsamples={this.state.nsamples}/>_
-        </div>
+        const Outputs = this.state.categoryNames.map((n, i) => <Output key = {i} value = {n}
+                                                                       active = {i === this.state.outputOn}
+                                                                       onTransitionEnd = {this.handleTransitionEnd}/>)
 
 
-     );
-  }
+        return(
+            <div>
+                <EventListener onKeyUp={this.captureGlobalEvent}/>
+                <Webcam
+                    audio={false}
+                    height={300}
+                    ref={this.setRef}
+                    screenshotFormat="image/jpeg"
+                    width={400}
+                    className="Webcam"
+                    //    videoConstraints={videoConstraints}
+                />
+                <h3> redict: {this.state.predict.toString()} </h3>
+                <p> Loss: {this.state.loss}</p>
+                {Outputs}
+                <SampleCounter category={this.state.category} nsamples={this.state.nsamples}/>
+
+
+            </div>
+
+
+        );
+    }
 
 }
 
