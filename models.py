@@ -6,8 +6,9 @@ from PIL import Image
 import base64, json
 
 conf_file = "data/config.json"
+data_dir = "data/"
 
-def dataurl2np(dataurl):
+def dataurl2im(dataurl):
     """
     Funcion auxiliar para convertir los datos de imagen codificados a un PIL Image. 
     """
@@ -22,13 +23,25 @@ class Index(Resource):
     Inicialización de los modelos.
     """
     def post(self):
-        shutil.rmtree("data/",ignore_errors=True)
-        os.mkdir("data/")
+        shutil.rmtree(data_dir,ignore_errors=True)
+        os.mkdir(data_dir)
         
         shutil.copyfile("static/config.json","data/config.json")
+
+        params = json.load(open(conf_file))
+        os.mkdir(data_dir+"img/")
+        for k in range(params["ncategories"]):
+            os.mkdir("{}img/cat{}/".format(data_dir,k))
         
         return "ok"
 
+
+def saveImg(img,category,ind):
+    """
+    Guarda la imagen en un directorio en disco según la categoria asignada. 
+    """
+    params = json.load(open(conf_file))
+    img.save("{}img/cat{}/img{}.png".format(data_dir,category,ind))
 
 # Modelo para entrenamiento
 class Train(Resource): 
@@ -40,17 +53,17 @@ class Train(Resource):
 
         args = parser.parse_args()
         params = json.load(open(conf_file))
-        img = dataurl2np(args["imgSrc"])
-        objclass = args["category"]
+        img = dataurl2im(args["imgSrc"])
+        category = args["category"]
 
-        # TODO: guardar las imagenes y entrenar el modelo a partir de las imagenes totales al momento. Dependiendo del costo podríamos ver de usar aumentación directamente.
-        # TODO2: Si tardase mucho, se podria armar la idea con sacar N fotos y luego entrenar.
+        saveImg(img,category,params["nsamples"][category])
+        
         
         net=KinderNet(params)     
-        loss=net.run(img,objclass,train_mode=True)
+        loss=net.run(img,category,train_mode=True)
         net.save()
 
-        params["nsamples"][objclass]+=1
+        params["nsamples"][category]+=1
 
         json.dump(params, open(conf_file,"w"))
         
@@ -59,7 +72,7 @@ class Train(Resource):
 # Modelo para clasificación.
 class Classify(Resource): 
      """
-     Utiliza el modelo actual para hacer una predicción. 
+     Utiliza el modelo actual para hacer la clasificación. La imagen recibida se guarda en un buffer en disco de tamaño batch * ncategories. Si se capturan más imágenes que el batch de una misma clase, se sobreescriben las primeras. 
      """
      def post(self): 
         
@@ -68,7 +81,7 @@ class Classify(Resource):
 
         args = parser.parse_args()
         params = json.load(open(conf_file))
-        img = dataurl2np(args["imgSrc"])
+        img = dataurl2im(args["imgSrc"])
 
         
         net=KinderNet(params)     

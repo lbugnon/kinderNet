@@ -3,9 +3,10 @@ import './App.css';
 import Webcam from "react-webcam";
 
 // Definiciones globales
-const serverUrl = "http://localhost:5000/"
+const serverUrl = "http://localhost:5000"
 const minCategories = 2
 const maxCategories = 4
+const trainWaitTime = 4000
 
 // SampleCounter ===================================
 function SampleCounter(props){
@@ -79,8 +80,10 @@ class KinderNet extends React.Component{
 
     handleTimerOut(){
 
-        let time = 4000
+        if(this.state.category === -1)
+            return
 
+        let time = trainWaitTime
         if(this.state.classify){
             this.classifyPic()
             time = 500
@@ -88,8 +91,6 @@ class KinderNet extends React.Component{
         else
             this.setState({classify: true}) // comienza modo clasificación
 
-
-        console.log("timer set in ",time)
         setTimeout(this.handleTimerOut,time)
     }
 
@@ -104,7 +105,7 @@ class KinderNet extends React.Component{
     classifyPic(){
         const imgSrc = this.webcam.getScreenshot()
         const entry = {imgSrc}
-        this.serverCall("clasificar/", entry)
+        this.serverCall("/clasificar/", entry)
         this.setState({classify: true, outputOn: this.state.category})
     }
 
@@ -115,7 +116,7 @@ class KinderNet extends React.Component{
             const category = Number(e.key)-1
             const entry = {category, imgSrc}
             this.setState({classify: false, category, outputOn: Number(e.key)-1})
-            this.serverCall("entrenar/",entry)
+            this.serverCall("/entrenar/",entry)
 
         }
 
@@ -134,7 +135,7 @@ class KinderNet extends React.Component{
             if ( minCategories <=  categoryNames.length && categoryNames.length <= maxCategories)
                 this.setState({categoryNames})
             const entry = {netSize: this.state.netSize, ncategories: this.state.categoryNames.length}
-            this.serverCall("modificarRed/",entry)
+            this.serverCall("/modificarRed/",entry)
              // TODO:  actualizar el dibujo
 
         }
@@ -163,12 +164,11 @@ class KinderNet extends React.Component{
                     audio={false}
                     height={300}
                     ref={this.setRef}
-                    screenshotFormat="image/jpeg"
+                    screenshotFormat="image/png"
                     width={400}
                     className="Webcam"
                     //    videoConstraints={videoConstraints}
                 />
-                <h3> Predict: {this.state.classify.toString()} </h3>
                 <p> Loss: {this.state.loss}</p>
                 {Outputs}
                 <SampleCounter category={this.state.category} nsamples={this.state.nsamples}/>
