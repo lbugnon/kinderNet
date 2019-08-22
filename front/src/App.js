@@ -7,7 +7,7 @@ const serverUrl = "http://localhost:5000/"
 const minCategories = 2
 const maxCategories = 4
 
-// SampleCounter ==========================================
+// SampleCounter ===================================
 function SampleCounter(props){
     var samplesList = props.nsamples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
 
@@ -15,6 +15,7 @@ function SampleCounter(props){
         <ul>{samplesList}</ul>
     );
 }
+
 
 // Output ==========================================
 function Output(props){
@@ -45,7 +46,7 @@ class KinderNet extends React.Component{
         super(props);
         this.state={
             category: -1,
-            predict: false,
+            classify: false,
             netSize: 0, // mayor valor, mas compleja la red
             categoryNames: [1,2],
             loss: 0,
@@ -54,7 +55,9 @@ class KinderNet extends React.Component{
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
         this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
+        this.handleTimerOut = this.handleTimerOut.bind(this);
         this.serverCall = this.serverCall.bind(this);
+        this.classifyPic = this.classifyPic.bind(this);
     }
     setRef = webcam => {
         this.webcam = webcam;
@@ -68,6 +71,26 @@ class KinderNet extends React.Component{
             cache: "no-cache",
             headers: new Headers({"content-type": "application/json"})
         }).then(response => response.json()).then(json => console.log("Init!"))
+
+        // Inicializa el timer
+        setTimeout(this.handleTimerOut,3000)
+
+    }
+
+    handleTimerOut(){
+
+        let time = 4000
+
+        if(this.state.classify){
+            this.classifyPic()
+            time = 500
+        }
+        else
+            this.setState({classify: true}) // comienza modo clasificación
+
+
+        console.log("timer set in ",time)
+        setTimeout(this.handleTimerOut,time)
     }
 
     serverCall(url,entry){
@@ -78,22 +101,27 @@ class KinderNet extends React.Component{
         }).then(response => response.json()).then(json => this.setState(json))
     }
 
+    classifyPic(){
+        const imgSrc = this.webcam.getScreenshot()
+        const entry = {imgSrc}
+        this.serverCall("clasificar/", entry)
+        this.setState({classify: true, outputOn: this.state.category})
+    }
+
     captureGlobalEvent(e) {
         // entrenamiento
         if (this.state.categoryNames.includes(Number(e.key))) {
             const imgSrc = this.webcam.getScreenshot()
             const category = Number(e.key)-1
             const entry = {category, imgSrc}
-            this.setState({predict: false, category , outputOn: Number(e.key)-1})
+            this.setState({classify: false, category, outputOn: Number(e.key)-1})
             this.serverCall("entrenar/",entry)
+
         }
 
         // test
         if (e.key.toLowerCase() === "c") {
-            const imgSrc = this.webcam.getScreenshot()
-            const entry = {imgSrc}
-            this.serverCall("clasificar/", entry)
-            this.setState({predict: true, outputOn: this.state.category})
+            this.classifyPic()
         }
 
         // Cambiar la cantidad de salidas
@@ -121,6 +149,8 @@ class KinderNet extends React.Component{
         this.setState({outputOn: -1})
     }
 
+
+
     render(){
         const Outputs = this.state.categoryNames.map((n, i) => <Output key = {i} value = {n}
                                                                        active = {i === this.state.outputOn}
@@ -138,7 +168,7 @@ class KinderNet extends React.Component{
                     className="Webcam"
                     //    videoConstraints={videoConstraints}
                 />
-                <h3> redict: {this.state.predict.toString()} </h3>
+                <h3> Predict: {this.state.classify.toString()} </h3>
                 <p> Loss: {this.state.loss}</p>
                 {Outputs}
                 <SampleCounter category={this.state.category} nsamples={this.state.nsamples}/>

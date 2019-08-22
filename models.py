@@ -56,7 +56,7 @@ class Train(Resource):
         
         return {"loss": loss,"nsamples": params["nsamples"]}
 
-# Modelo para predicción
+# Modelo para clasificación.
 class Classify(Resource): 
      """
      Utiliza el modelo actual para hacer una predicción. 
