@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import './App.css';
 import Webcam from "react-webcam";
 import {Grid, Container, Paper, Button} from '@material-ui/core'
@@ -137,7 +137,7 @@ class KinderNet extends React.Component{
                 categoryNames.pop()
             if ( minCategories <=  categoryNames.length && categoryNames.length <= maxCategories)
                 this.setState({categoryNames})
-            const entry = {netSize: this.state.netSize, ncategories: this.state.categoryNames.length}
+            const entry = {netSize: this.state.netSize, n_categories: this.state.categoryNames.length}
             this.serverCall("/modificarRed/",entry)
              // TODO:  actualizar el dibujo
 

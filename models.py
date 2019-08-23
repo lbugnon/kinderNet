@@ -41,7 +41,7 @@ def save_img(img: Image, category: int, ind: int):
     :return: None
     """
     params = json.load(open(conf_file))
-    img.save("{}/cat{}/img{}.png".format(params["img_dir"], category, ind))
+    img.save("{}cat{}/img{}.png".format(params["img_dir"], category, ind))
 
 
 class Index(Resource):
@@ -52,8 +52,8 @@ class Index(Resource):
         params = json.load(open("static/config.json"))
         model_dir = params["model_dir"]
         img_dir = params["img_dir"]
-        shutil.rmtree(model_dir, ignore_errors=True)
-        shutil.rmtree(img_dir, ignore_errors=True)
+        shutil.rmtree("data/", ignore_errors=True)
+        os.mkdir("data/")
         os.mkdir(model_dir)
         os.mkdir(img_dir)
 
@@ -129,6 +129,11 @@ class ChangeNet(Resource):
         params.update(params_changed)
 
         json.dump(params,open(conf_file, "w"))
+
+        shutil.rmtree(params["img_dir"])
+        os.mkdir(params["img_dir"])
+        for n in range(n_cat):
+            os.mkdir("{}cat{}/".format(params["img_dir"],n))
 
         if os.path.exists(params["model_dir"] + "model.par"):
             os.remove(params["model_dir"] + "model.par")

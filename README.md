@@ -1,4 +1,4 @@
-##### [sinc(i)](http://www.sinc.unl.edu.ar) - Instituto de Investigación en Señales, Sistemas e Inteligencia Computacional.
+﻿##### [sinc(i)](http://www.sinc.unl.edu.ar) - Instituto de Investigación en Señales, Sistemas e Inteligencia Computacional.
 ## KinderNet
 Este repositorio es un proyecto de aplicación web para aprender sobre redes neuronales con alumnos de primaria/secundaria. El objetivo es que la aplicación sea interactiva y puedan jugar y experimentar con el proceso de entrenamiento y prueba de algoritmos de aprendizaje automático. 
 
@@ -13,5 +13,5 @@ En caso de que surjan errores en la instalación del paquete torch, seguir las i
 
 ## Levantar la aplicación (en "modo rápido")
 - Levantar el servidor: desde el directorio raiz del proyecto ejecutar "python flask_server.py".
-- En otra consola, correr "npm start --prefix front/". La aplicación debería abrirse automáticamente en [http://localhost:3000](http://localhost:3000).
+- En otra consola, correr "npm start --prefix frontend/". La aplicación debería abrirse automáticamente en [http://localhost:3000](http://localhost:3000).
 
