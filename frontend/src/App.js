@@ -1,17 +1,18 @@
 ﻿import React from 'react';
 import './App.css';
 import Webcam from "react-webcam";
-import {Grid, Container, Paper, Button} from '@material-ui/core'
+import Grid from '@material-ui/core/Grid'
+import Container from '@material-ui/core/Container'
 
 // Definiciones globales
 const serverUrl = "http://localhost:5000"
 const minCategories = 2
 const maxCategories = 4
-const trainWaitTime = 4000
+const useTimer = true
 
 // SampleCounter ===================================
 function SampleCounter(props){
-    var samplesList = props.n_samples .map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
+    let samplesList = props.n_samples .map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
 
     return(
         <ul>{samplesList}</ul>
@@ -55,7 +56,8 @@ class KinderNet extends React.Component{
             categoryNames: [1,2],
             loss: 0,
             n_samples : [0,0], // n_samples  de la clase actual durante el entrenamiento
-            outputOn: -1
+            outputOn: -1,
+            timer: 4000
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
         this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
@@ -77,16 +79,22 @@ class KinderNet extends React.Component{
         }).then(response => response.json()).then(json => console.log("Init!"))
 
         // Inicializa el timer
-        setTimeout(this.handleTimerOut,3000)
+        if(useTimer)
+            setTimeout(this.handleTimerOut,3000)
 
     }
 
     handleTimerOut(){
 
-        if(this.state.category === -1)
-            return
 
-        let time = trainWaitTime
+        let time = this.state.timer
+
+        if(this.state.category === -1){
+            setTimeout(this.handleTimerOut,time)
+            return
+        }
+
+
         if(this.state.classify){
             this.classifyPic()
             time = 500
@@ -95,6 +103,7 @@ class KinderNet extends React.Component{
             this.setState({classify: true}) // comienza modo clasificación
 
         setTimeout(this.handleTimerOut,time)
+        return
     }
 
     serverCall(url,entry){
@@ -126,6 +135,7 @@ class KinderNet extends React.Component{
         // test
         if (e.key.toLowerCase() === "c") {
             this.classifyPic()
+
         }
 
         // Cambiar la cantidad de salidas
@@ -170,7 +180,7 @@ class KinderNet extends React.Component{
                             <Webcam
                                 audio={false}
                                 ref={this.setRef}
-                                screenshotFormat="image/jpg"
+                                screenshotFormat="image/png"
                                 quality={1}
                                 className="Webcam"
                             />

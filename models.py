@@ -31,7 +31,7 @@ def data2img(data: str) -> Image:
     return img
 
 
-def save_img(img: Image, category: int, ind: int):
+def save_img(img: Image, category: int, ind: int = 0):
     """
     Save img in the data folder.
 
@@ -62,7 +62,6 @@ class Index(Resource):
 
         for k in range(params["n_categories"]):
             os.mkdir("{}/cat{}/".format(img_dir, k))
-        
         return "ok"
 
 
@@ -106,6 +105,8 @@ class Classify(Resource):
         params = json.load(open(conf_file))
         img = data2img(args["imgSrc"])
 
+        img.save("{}/test.png".format(params["img_dir"]))
+        
         net = KinderNet(params)
         out = int(net.run_test(img))
 
