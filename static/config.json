@@ -1,1 +1,8 @@
-{"ncategories": 2, "model_dir": "data/", "nsamples": [0, 0], "classify": 0, "net_size": 0, "batch": 32}
+{"n_categories": 2,
+ "model_dir": "data/model/",
+ "img_dir": "data/img/",
+ "n_samples": [0, 0],
+ "classify": 0,
+ "net_size": 0,
+ "batch": 32,
+ "img_size": 350}

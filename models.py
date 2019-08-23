@@ -1,51 +1,70 @@
 from flask_restful import Resource, reqparse
-import shutil,os,io
+import shutil
+import os
+import io
+import base64
+import json
 from kinderNet import KinderNet
-import numpy as np
 from PIL import Image
-import base64, json
 
 conf_file = "data/config.json"
-data_dir = "data/"
 
-def dataurl2im(dataurl):
+
+def data2img(data: str, size=None) -> Image:
     """
-    Funcion auxiliar para convertir los datos de imagen codificados a un PIL Image. 
+    Convert the string-coded image to PIL.Image.
+
+    :param data: String with Image data coded in.
+    :param size: Size of output image
+    :return: PIL.Image
     """
-    data=dataurl.split(";")[1].split(",")[1]
+    data = data.split(";")[1].split(",")[1]
     image_bytes = io.BytesIO(base64.b64decode(data))
-    im = Image.open(image_bytes)
-    return im
+    img = Image.open(image_bytes)
+    if size is not None:
+        img = img.resize((size, size))
+    return img
 
-# Inicialización
+
+def save_img(img: Image, category: int, ind: int):
+    """
+    Save img in the data folder.
+
+    :param img: Image to save.
+    :param category: Class of the image.
+    :param ind: The number of sample of that class.
+    :return: None
+    """
+    params = json.load(open(conf_file))
+    img.save("{}/cat{}/img{}.png".format(params["img_dir"], category, ind))
+
+
 class Index(Resource):
     """
-    Inicialización de los modelos.
+    Model initialization.
     """
     def post(self):
-        shutil.rmtree(data_dir,ignore_errors=True)
-        os.mkdir(data_dir)
-        
-        shutil.copyfile("static/config.json","data/config.json")
+        params = json.load(open("static/config.json"))
+        model_dir = params["model_dir"]
+        img_dir = params["img_dir"]
+        shutil.rmtree(model_dir, ignore_errors=True)
+        shutil.rmtree(img_dir, ignore_errors=True)
+        os.mkdir(model_dir)
+        os.mkdir(img_dir)
 
-        params = json.load(open(conf_file))
-        os.mkdir(data_dir+"img/")
-        for k in range(params["ncategories"]):
-            os.mkdir("{}img/cat{}/".format(data_dir,k))
+        shutil.copyfile("static/config.json", conf_file)
+
+        for k in range(params["n_categories"]):
+            os.mkdir("{}/cat{}/".format(img_dir, k))
         
         return "ok"
 
 
-def saveImg(img,category,ind):
+class Train(Resource):
     """
-    Guarda la imagen en un directorio en disco según la categoria asignada. 
+    Train model. Incoming images are saved to the img_dir, and then the network is trained with a batch.
     """
-    params = json.load(open(conf_file))
-    img.save("{}img/cat{}/img{}.png".format(data_dir,category,ind))
-
-# Modelo para entrenamiento
-class Train(Resource): 
-    def post(self): 
+    def post(self):
       
         parser = reqparse.RequestParser()
         parser.add_argument('category', type=int, help='Category to be classified')
@@ -53,69 +72,61 @@ class Train(Resource):
 
         args = parser.parse_args()
         params = json.load(open(conf_file))
-        img = dataurl2im(args["imgSrc"])
+        img = data2img(args["imgSrc"])
         category = args["category"]
 
-        saveImg(img,category,params["nsamples"][category])
-        
-        
-        net=KinderNet(params)     
-        loss=net.run(img,category,train_mode=True)
+        save_img(img, category, params["n_samples"][category])
+
+        net = KinderNet(params)
+        loss = net.run_train()
         net.save()
 
-        params["nsamples"][category]+=1
+        params["n_samples"][category] += 1
 
-        json.dump(params, open(conf_file,"w"))
+        json.dump(params, open(conf_file, "w"))
         
-        return {"loss": loss,"nsamples": params["nsamples"]}
+        return {"loss": loss, "n_samples": params["n_samples"]}
 
-# Modelo para clasificación.
+
 class Classify(Resource): 
-     """
-     Utiliza el modelo actual para hacer la clasificación. La imagen recibida se guarda en un buffer en disco de tamaño batch * ncategories. Si se capturan más imágenes que el batch de una misma clase, se sobreescriben las primeras. 
-     """
-     def post(self): 
-        
+    """
+    Use the trained network to classify the incoming image.
+    """
+    def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('imgSrc', type=str, help='image data')
 
         args = parser.parse_args()
         params = json.load(open(conf_file))
-        img = dataurl2im(args["imgSrc"])
+        img = data2img(args["imgSrc"])
 
-        
-        net=KinderNet(params)     
-        out=int(net.run(img))
+        net = KinderNet(params)
+        out = int(net.run_test(img))
 
         return {"category": out}
 
-# Modelo para cambios en la red
+
 class ChangeNet(Resource):
     def post(self):
         """
-        Modifica la complejidad y cantidad de salidas de la red. 
+        Change the network complexity and its number of outputs.
         """
         parser = reqparse.RequestParser()
-        parser.add_argument('netSize', type=int, help='Tamaño de la red (1,2 o 3)')
-        parser.add_argument('ncategories',  help='Cantidad de salidas')
+        parser.add_argument('netSize', type=int, help='Network size (1,2 o 3)')
+        parser.add_argument('n_categories',  help='Number of outputs')
         args = parser.parse_args()
 
-        print(args["ncategories"])
-        ncat = int(args["ncategories"])
+        n_cat = int(args["n_categories"])
 
         params = json.load(open(conf_file))
 
-
-        # reset contadores
-        
-        params_changed={"net_size":args["netSize"], "ncategories": ncat, "nsamples": [0 for x in range(ncat)]}
+        params_changed = {"net_size": args["netSize"], "n_categories": n_cat, "n_samples": [0 for x in range(n_cat)]}
         params.update(params_changed)
 
-        json.dump(params,open(conf_file,"w"))
+        json.dump(params,open(conf_file, "w"))
+
+        if os.path.exists(params["model_dir"] + "model.par"):
+            os.remove(params["model_dir"] + "model.par")
         
-        # Borramos el modelo anterior
-        if os.path.exists("data/model.par"):
-            os.remove("data/model.par")
-        
-        return {"network_img": "TODO_url", "nsamples": params["nsamples"]}
+        return {"network_img": "TODO_url", "n_samples": params["n_samples"]}
 

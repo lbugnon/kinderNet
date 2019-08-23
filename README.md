@@ -7,7 +7,7 @@ Autores (por orden alfabético): L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C.
 Se requiere tener python>=3.5 instalado. Desde la carpeta raiz del repositorio:
 - Utilizando el gestor de paquetes pip, instalar los modulos de python con "python -m pip install --user -r requirements.txt". Si se utiliza un gestor basado en Anaconda, instalar con "conda install --file requirements.txt". 
 - Instalar [node.js](https://nodejs.org/en/download/)
-- Instalar los paquetes necesarios para React con "npm --prefix front/ install react-scripts"
+- Instalar los paquetes necesarios para React con "npm --prefix frontend/ install react-scripts react-webcam @material-ui/core". Estos paquetes se instalarán localmente en el directorio frontend/node_modules.
 
 En caso de que surjan errores en la instalación del paquete torch, seguir las instrucciones en [https://pytorch.org/](https://pytorch.org/).
 

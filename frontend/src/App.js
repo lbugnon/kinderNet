@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Webcam from "react-webcam";
+import {Grid, Container, Paper, Button} from '@material-ui/core'
 
 // Definiciones globales
 const serverUrl = "http://localhost:5000"
@@ -10,7 +11,7 @@ const trainWaitTime = 4000
 
 // SampleCounter ===================================
 function SampleCounter(props){
-    var samplesList = props.nsamples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
+    var samplesList = props.n_samples .map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
 
     return(
         <ul>{samplesList}</ul>
@@ -22,8 +23,10 @@ function SampleCounter(props){
 function Output(props){
 
     const style = props.active ? "outputOn" : "output";
+    //const style = props.active ? "contained" : "outlined";
     return (
         <button onTransitionEnd={props.onTransitionEnd} className={style}> Clase {props.value} </button>
+        //<Button onTransitionEnd={props.onTransitionEnd} variant={style}> Clase {props.value} </Button>
 );
 }
 
@@ -51,7 +54,7 @@ class KinderNet extends React.Component{
             netSize: 0, // mayor valor, mas compleja la red
             categoryNames: [1,2],
             loss: 0,
-            nsamples: [0,0], // nsamples de la clase actual durante el entrenamiento
+            n_samples : [0,0], // n_samples  de la clase actual durante el entrenamiento
             outputOn: -1
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
@@ -153,27 +156,42 @@ class KinderNet extends React.Component{
 
 
     render(){
-        const Outputs = this.state.categoryNames.map((n, i) => <Output key = {i} value = {n}
+        const Outputs = this.state.categoryNames.map((n, i) => <Container key = {i}> <Output  value = {n}
                                                                        active = {i === this.state.outputOn}
-                                                                       onTransitionEnd = {this.handleTransitionEnd}/>)
+                                                                       onTransitionEnd = {this.handleTransitionEnd}/>
+        </Container>)
 
         return(
-            <div>
-                <EventListener onKeyUp={this.captureGlobalEvent}/>
-                <Webcam
-                    audio={false}
-                    height={300}
-                    ref={this.setRef}
-                    screenshotFormat="image/png"
-                    width={400}
-                    className="Webcam"
-                    //    videoConstraints={videoConstraints}
-                />
-                <p> Loss: {this.state.loss}</p>
-                {Outputs}
-                <SampleCounter category={this.state.category} nsamples={this.state.nsamples}/>
+            <div style={{padding: 50}}>
+                <Grid container spacing={0} justify="center" align="center">
+                    <EventListener onKeyUp={this.captureGlobalEvent}/>
+                    <Grid item lg={4}>
+                        <Container >
+                            <Webcam
+                                audio={false}
+                                ref={this.setRef}
+                                screenshotFormat="image/png"
+                                quality={1}
+                                className="Webcam"
+                            />
+                        <Container align="left">
+                            <p> Loss: {this.state.loss}</p>
+                            <SampleCounter category={this.state.category} n_samples ={this.state.n_samples}/>
+                        </Container>
+                        </Container>
+                    </Grid>
+                    <Grid item lg={4}>
+                        <Container>
+                            <p> Imagen de la red </p>
+                        </Container>
+                    </Grid>
+                    <Grid item lg={4}>
+                        <Grid container direction="column" justify="center" alignment="center">
+                            {Outputs}
+                        </Grid>
 
-
+                    </Grid>
+                </Grid>
             </div>
 
 

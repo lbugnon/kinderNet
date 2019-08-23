@@ -3,4 +3,5 @@ flask_restful
 flask_cors
 torch
 torchvision
+PIL
 numpy
