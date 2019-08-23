@@ -10,19 +10,24 @@ from PIL import Image
 conf_file = "data/config.json"
 
 
-def data2img(data: str, size=None) -> Image:
+def data2img(data: str) -> Image:
     """
     Convert the string-coded image to PIL.Image.
 
     :param data: String with Image data coded in.
-    :param size: Size of output image
     :return: PIL.Image
     """
     data = data.split(";")[1].split(",")[1]
     image_bytes = io.BytesIO(base64.b64decode(data))
     img = Image.open(image_bytes)
-    if size is not None:
-        img = img.resize((size, size))
+    print(img.size)
+
+    # Crop 25% of the margins (TODO check webcam compat)
+    w, h = img.size
+    wc = w//4
+    hc = h//5
+    img = img.crop((wc, hc, w-wc, h-hc))
+    print(img.size)
     return img
 
 

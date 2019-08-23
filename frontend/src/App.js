@@ -170,7 +170,7 @@ class KinderNet extends React.Component{
                             <Webcam
                                 audio={false}
                                 ref={this.setRef}
-                                screenshotFormat="image/png"
+                                screenshotFormat="image/jpg"
                                 quality={1}
                                 className="Webcam"
                             />
