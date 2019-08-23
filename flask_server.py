@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restful import Api
 from flask_cors import CORS
 from models import Index, Train, Classify, ChangeNet
+import webbrowser
 
 app = Flask(__name__)
 cors= CORS(app, resources={r"*": {"origins": "*"}})
