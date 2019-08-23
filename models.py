@@ -53,7 +53,8 @@ class Index(Resource):
         model_dir = params["model_dir"]
         img_dir = params["img_dir"]
         shutil.rmtree("data/", ignore_errors=True)
-        os.mkdir("data/")
+        if not os.path.isdir("data/"):
+            os.mkdir("data/")
         os.mkdir(model_dir)
         os.mkdir(img_dir)
 
