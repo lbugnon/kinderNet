@@ -31,6 +31,38 @@ function Output(props){
 );
 }
 
+// Network ==========================================
+function Network(props){
+
+    let layer1, layer2, layer3
+    //if (props.netSize === 0){
+        layer1 = [1,2]
+        layer2 = [1,2,3]
+        layer3 = [...Array(props.outputs).keys()]
+    //}
+    layer1 = layer1.map((x, i) => <Grid container direction="column"><span key={i} className = "neuron"></span></Grid>)
+    layer2 = layer2.map((x, i) => <Grid container direction="column"><span key={i} className = "neuron"></span></Grid>)
+    layer3 = layer3.map((x, i) => <Grid container direction="column"><span key={i} className = "neuron"></span></Grid>)
+
+
+    return (
+        <Grid container>
+            <Grid item>
+                {layer1}
+            </Grid>
+            <Grid item>
+                {layer2}
+            </Grid>
+            <Grid item>
+                {layer3}
+            </Grid>
+        </Grid>
+
+);
+}
+
+
+
 // event listener
 class EventListener extends React.Component{
     componentDidMount() {
@@ -192,7 +224,7 @@ class KinderNet extends React.Component{
                     </Grid>
                     <Grid item lg={4}>
                         <Container>
-                            <p> Imagen de la red </p>
+                            <Network size={this.state.netSize} outputs={this.state.categoryNames.length}/>
                         </Container>
                     </Grid>
                     <Grid item lg={4}>

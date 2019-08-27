@@ -10,6 +10,13 @@
   height: 350px;
 }
 
+.neuron{
+  height: 50px;
+  width: 50px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
 
 .output {
   background-color: white;
