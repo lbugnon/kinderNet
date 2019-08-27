@@ -3,12 +3,13 @@
 }
 
 .Webcam{
-  border: 2px solid;
   borderRadius: 10px;
   object-fit: none;
   width: 350px;
   height: 350px;
+  border: 2px solid;
 }
+
 
 .neuron{
   height: 50px;

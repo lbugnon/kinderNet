@@ -8,7 +8,7 @@ import Container from '@material-ui/core/Container'
 const serverUrl = "http://localhost:5000"
 const minCategories = 2
 const maxCategories = 4
-const useTimer = false
+const useTimer = true
 
 // SampleCounter ===================================
 function SampleCounter(props){
@@ -20,12 +20,13 @@ function SampleCounter(props){
 }
 
 // Network
-function Network(props) {
+function Network(props){
 
-    const width = 600
-    const height = 450
+    const width = 800
+    const xcenter = width / 3
+    const height = 550
     const layer_sep = 200
-    const unit_sep = 80
+    const unit_sep = [90, 90, 110]
     var nunits
     switch (props.size) {
         case 0:
@@ -38,16 +39,13 @@ function Network(props) {
             nunits = [4, 5, props.noutputs]
             break
     }
-
-    const xpos = [-1, 0, 1].map((x, k) => x * layer_sep + width / 2)
+    const xpos = [-1, 0, 1].map((x, k) => x * layer_sep + xcenter)
     var layers = Array(3)
     var ypos = Array(3)
     for (var i = 0; i < layers.length; i++) {
-
-        ypos[i] = Array.from(Array(nunits[i]).keys()).map((x, k) => height/2 + unit_sep * (k - nunits[i] / 2))
-
+        ypos[i] = Array.from(Array(nunits[i]).keys()).map((x, k) => height/2 + unit_sep[i] * (k - nunits[i] / 2))
         layers[i] = ypos[i].map((x, k) => <circle key={k} onTransitionEnd={props.onTransitionEnd} className={(i === layers.length-1 &&  props.active === k )? "outputOn" : "output"}
-                                                        cx={xpos[i]} cy={x} /> )
+                                                  cx={xpos[i]} cy={x} /> )
     }
     // lines
     var lines = Array((nunits[0]+nunits[2]) * nunits[1])
@@ -69,15 +67,21 @@ function Network(props) {
                 ind++
             }
 
+    const im_height = 100
+    const category_display = props.images.map((v, k) => <image key={k} xlinkHref={props.images[k]}
+                                                               x={xpos[2]+layer_sep/3} y={Math.floor(ypos[2][k])-im_height/2}
+                                                               viewBox={"0 0 1 1"}
+                                                               width={im_height} height={im_height} preserveAspectRatio="xMidYMid slice"/>)
 
     return (
         <svg width={width} height={height} className={"shadow"}>
             {lines}
             {layers}
-            <embed src={props.imgSrc} x={100} y={100} width={100} height={100}/>
+            {category_display}
         </svg>
-);
+    );
 }
+
 
 
 // event listener
@@ -103,6 +107,7 @@ class KinderNet extends React.Component{
             classify: false,
             netSize: 0, // mayor valor, mas compleja la red
             categoryNames: [1,2],
+            images: [[],[]],
             loss: 0,
             n_samples : [0,0], // n_samples  de la clase actual durante el entrenamiento
             outputOn: -1,
@@ -174,10 +179,11 @@ class KinderNet extends React.Component{
         console.log(e.key)
         // entrenamiento
         if (this.state.categoryNames.includes(Number(e.key))) {
-            const imgSrc = this.webcam.getScreenshot()
+            let images = this.state.images.slice()
             const category = Number(e.key)-1
-            const entry = {category, imgSrc}
-            this.setState({classify: false, category, outputOn: Number(e.key)-1, imgSrc})
+            images[category] = this.webcam.getScreenshot()
+            const entry = {category, imgSrc: images[category]}
+            this.setState({classify: false, category, outputOn: Number(e.key)-1, images})
             this.serverCall("/entrenar/",entry)
 
         }
@@ -196,7 +202,7 @@ class KinderNet extends React.Component{
             if (e.key.toLowerCase() === "z")
                 categoryNames.pop()
             if ( minCategories <=  categoryNames.length && categoryNames.length <= maxCategories)
-                this.setState({categoryNames})
+                this.setState({categoryNames, images: Array(categoryNames.length)})
             if(e.key === "+")
                 if (this.state.netSize < 2)
                     this.setState({netSize: this.state.netSize + 1})
@@ -224,7 +230,7 @@ class KinderNet extends React.Component{
                 <Grid container spacing={0} justify="center" align="center">
                     <EventListener onKeyUp={this.captureGlobalEvent}/>
                     <Grid item lg={4}>
-                        <Container >
+                        <Container style={{padding: 50}}>
                             <Webcam
                                 audio={false}
                                 ref={this.setRef}
@@ -241,7 +247,7 @@ class KinderNet extends React.Component{
                     <Grid item lg={8}>
                         <Container>
                             <Network active = {this.state.outputOn} onTransitionEnd = {this.handleTransitionEnd}
-                                     imgSrc={this.state.imgSrc} size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
+                                     images={this.state.images} size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
                         </Container>
                     </Grid>
                 </Grid>
