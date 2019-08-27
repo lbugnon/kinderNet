@@ -22,12 +22,22 @@ function SampleCounter(props){
 // Network
 function Network(props) {
 
-    // const style = props.active ? "outputOn" : "output";
-    const width = 400
-    const height = 400
-    const layer_sep = 100
-    const unit_sep = 60
-    const nunits = [3, 5, props.noutputs]
+    const width = 600
+    const height = 450
+    const layer_sep = 200
+    const unit_sep = 80
+    var nunits
+    switch (props.size) {
+        case 0:
+            nunits = [2, 3, props.noutputs]
+            break
+        case 1:
+            nunits = [3, 4, props.noutputs]
+            break
+        case 2:
+            nunits = [4, 5, props.noutputs]
+            break
+    }
 
     const xpos = [-1, 0, 1].map((x, k) => x * layer_sep + width / 2)
     var layers = Array(3)
@@ -36,20 +46,32 @@ function Network(props) {
 
         ypos[i] = Array.from(Array(nunits[i]).keys()).map((x, k) => height/2 + unit_sep * (k - nunits[i] / 2))
 
-        layers[i] = ypos[i].map((x, k) => <circle onTransitionEnd={props.onTransitionEnd} className={(i === layers.length-1 &&  props.active === k )? "outputOn" : "output"}
-                                                        cx={xpos[i]} cy={x} r={20} stroke={"green"} strokeWidth={5} fill={"white"} /> )
+        layers[i] = ypos[i].map((x, k) => <circle key={k} onTransitionEnd={props.onTransitionEnd} className={(i === layers.length-1 &&  props.active === k )? "outputOn" : "output"}
+                                                        cx={xpos[i]} cy={x} /> )
     }
     // lines
-    var lines = Array(0)
+    var lines = Array((nunits[0]+nunits[2]) * nunits[1])
+    var ind = 0
+    var style = 0
     for (var i = 0; i < layers.length-1; i++)
         for (var j = 0; j < nunits[i]; j++)
-            for (var z = 0; z < nunits[i+1]; z++)
-                lines.push(<line x1={xpos[i]} y1={ypos[i][j]} x2={xpos[i+1]} y2={ypos[i+1][z]} stroke={"rgb(0,0,0)"} stroke-width={"1"} />)
-
+            for (var z = 0; z < nunits[i+1]; z++) {
+                style = "line"
+                if (props.active !== -1) {
+                    if (i + 1 === layers.length - 1) {
+                        if (z === props.active)
+                            style = "lineOn2"
+                    } else
+                        style = "lineOn1"
+                }
+                lines[ind] = <line key={ind} x1={xpos[i]} y1={ypos[i][j]} x2={xpos[i+1]} y2={ypos[i+1][z]}
+                                   className={style} strokeWidth={"1"} />
+                ind++
+            }
 
 
     return (
-        <svg width={width} height={height}>
+        <svg width={width} height={height} className={"shadow"}>
             {lines}
             {layers}
         </svg>
@@ -148,6 +170,7 @@ class KinderNet extends React.Component{
     }
 
     captureGlobalEvent(e) {
+        console.log(e.key)
         // entrenamiento
         if (this.state.categoryNames.includes(Number(e.key))) {
             const imgSrc = this.webcam.getScreenshot()
@@ -165,7 +188,7 @@ class KinderNet extends React.Component{
         }
 
         // Cambiar la cantidad de salidas
-        if (["a","z"].includes(e.key.toLowerCase())) {
+        if (["+","-","a","z"].includes(e.key.toLowerCase())) {
             let categoryNames = this.state.categoryNames.slice()
             if (e.key.toLowerCase() === "a")
                 categoryNames.push(Number(categoryNames[categoryNames.length - 1]) + 1)
@@ -173,14 +196,16 @@ class KinderNet extends React.Component{
                 categoryNames.pop()
             if ( minCategories <=  categoryNames.length && categoryNames.length <= maxCategories)
                 this.setState({categoryNames})
-            const entry = {netSize: this.state.netSize, n_categories: this.state.categoryNames.length}
+            if(e.key === "+")
+                if (this.state.netSize < 2)
+                    this.setState({netSize: this.state.netSize + 1})
+
+            if(e.key === "-")
+                if (this.state.netSize > 0)
+                    this.setState({netSize: this.state.netSize-1})
+            const entry = {netSize: this.state.netsize, n_categories: this.state.categoryNames.length}
             this.serverCall("/modificarRed/",entry)
-             // TODO:  actualizar el dibujo
 
-        }
-
-        // Cambiar el tamaño de la red
-        if (e.key === "+"){
         }
 
     }
@@ -192,7 +217,7 @@ class KinderNet extends React.Component{
 
 
     render(){
-        
+
         return(
             <div style={{padding: 50}}>
                 <Grid container spacing={0} justify="center" align="center">
@@ -214,15 +239,10 @@ class KinderNet extends React.Component{
                     </Grid>
                     <Grid item lg={8}>
                         <Container>
-                            <Network active = {this.state.outputOn} onTransitionEnd = {this.handleTransitionEnd} size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
+                            <Network active = {this.state.outputOn} onTransitionEnd = {this.handleTransitionEnd}
+                                     size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
                         </Container>
                     </Grid>
-                    {/*<Grid item lg={4}>*/}
-                    {/*    <Grid container direction="column" justify="center" alignment="center">*/}
-                    {/*        {Outputs}*/}
-                    {/*    </Grid>*/}
-
-                    {/*</Grid>*/}
                 </Grid>
             </div>
 
