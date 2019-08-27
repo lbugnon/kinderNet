@@ -8,7 +8,7 @@ import Container from '@material-ui/core/Container'
 const serverUrl = "http://localhost:5000"
 const minCategories = 2
 const maxCategories = 4
-const useTimer = true
+const useTimer = false
 
 // SampleCounter ===================================
 function SampleCounter(props){
@@ -19,48 +19,42 @@ function SampleCounter(props){
     );
 }
 
+// Network
+function Network(props) {
 
-// Output ==========================================
-function Output(props){
+    // const style = props.active ? "outputOn" : "output";
+    const width = 400
+    const height = 400
+    const layer_sep = 100
+    const unit_sep = 60
+    const nunits = [3, 5, props.noutputs]
 
-    const style = props.active ? "outputOn" : "output";
-    //const style = props.active ? "contained" : "outlined";
+    const xpos = [-1, 0, 1].map((x, k) => x * layer_sep + width / 2)
+    var layers = Array(3)
+    var ypos = Array(3)
+    for (var i = 0; i < layers.length; i++) {
+
+        ypos[i] = Array.from(Array(nunits[i]).keys()).map((x, k) => height/2 + unit_sep * (k - nunits[i] / 2))
+
+        layers[i] = ypos[i].map((x, k) => <circle onTransitionEnd={props.onTransitionEnd} className={(i === layers.length-1 &&  props.active === k )? "outputOn" : "output"}
+                                                        cx={xpos[i]} cy={x} r={20} stroke={"green"} strokeWidth={5} fill={"white"} /> )
+    }
+    // lines
+    var lines = Array(0)
+    for (var i = 0; i < layers.length-1; i++)
+        for (var j = 0; j < nunits[i]; j++)
+            for (var z = 0; z < nunits[i+1]; z++)
+                lines.push(<line x1={xpos[i]} y1={ypos[i][j]} x2={xpos[i+1]} y2={ypos[i+1][z]} stroke={"rgb(0,0,0)"} stroke-width={"1"} />)
+
+
+
     return (
-        <button onTransitionEnd={props.onTransitionEnd} className={style}> Clase {props.value} </button>
-        //<Button onTransitionEnd={props.onTransitionEnd} variant={style}> Clase {props.value} </Button>
+        <svg width={width} height={height}>
+            {lines}
+            {layers}
+        </svg>
 );
 }
-
-// Network ==========================================
-function Network(props){
-
-    let layer1, layer2, layer3
-    //if (props.netSize === 0){
-        layer1 = [1,2]
-        layer2 = [1,2,3]
-        layer3 = [...Array(props.outputs).keys()]
-    //}
-    layer1 = layer1.map((x, i) => <Grid container direction="column"><span key={i} className = "neuron"></span></Grid>)
-    layer2 = layer2.map((x, i) => <Grid container direction="column"><span key={i} className = "neuron"></span></Grid>)
-    layer3 = layer3.map((x, i) => <Grid container direction="column"><span key={i} className = "neuron"></span></Grid>)
-
-
-    return (
-        <Grid container>
-            <Grid item>
-                {layer1}
-            </Grid>
-            <Grid item>
-                {layer2}
-            </Grid>
-            <Grid item>
-                {layer3}
-            </Grid>
-        </Grid>
-
-);
-}
-
 
 
 // event listener
@@ -198,11 +192,7 @@ class KinderNet extends React.Component{
 
 
     render(){
-        const Outputs = this.state.categoryNames.map((n, i) => <Container key = {i}> <Output  value = {n}
-                                                                       active = {i === this.state.outputOn}
-                                                                       onTransitionEnd = {this.handleTransitionEnd}/>
-        </Container>)
-
+        
         return(
             <div style={{padding: 50}}>
                 <Grid container spacing={0} justify="center" align="center">
@@ -222,17 +212,17 @@ class KinderNet extends React.Component{
                         </Container>
                         </Container>
                     </Grid>
-                    <Grid item lg={4}>
+                    <Grid item lg={8}>
                         <Container>
-                            <Network size={this.state.netSize} outputs={this.state.categoryNames.length}/>
+                            <Network active = {this.state.outputOn} onTransitionEnd = {this.handleTransitionEnd} size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
                         </Container>
                     </Grid>
-                    <Grid item lg={4}>
-                        <Grid container direction="column" justify="center" alignment="center">
-                            {Outputs}
-                        </Grid>
+                    {/*<Grid item lg={4}>*/}
+                    {/*    <Grid container direction="column" justify="center" alignment="center">*/}
+                    {/*        {Outputs}*/}
+                    {/*    </Grid>*/}
 
-                    </Grid>
+                    {/*</Grid>*/}
                 </Grid>
             </div>
 

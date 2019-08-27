@@ -19,7 +19,7 @@
 }
 
 .output {
-  background-color: white;
+  background-color: #4CAF50;
   border: 2px solid #4CAF50;
   color: black;
   padding: 16px 32px;
@@ -30,14 +30,15 @@
 }
 
 .outputOn {
-  border: 2px solid #4CAF50;
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
-  margin: 4px 4px;
-  color: white;
-  background-color: #4CAF50;
-  transition-duration: .2s;
+    bottom: ;order: 2px solid #4CAF50;
+    padding: 16px 32px;
+    text-align: center;
+    font-size: 16px;
+    stroke: blue;
+    margin: 4px 4px;
+    color: white;
+    background-color: #4CAF50;
+    transition-duration: .2s;
 }
 
 .App-logo {
