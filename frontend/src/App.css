@@ -1,0 +1,96 @@
+.App {
+  text-align: center;
+}
+
+.Webcam{
+  borderRadius: 10px;
+  object-fit: none;
+  width: 350px;
+  height: 350px;
+  border: 2px solid;
+}
+
+
+.neuron{
+  height: 50px;
+  width: 50px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.output {
+  fill: darkgrey;
+  r: 25;
+  stroke: black;
+  stroke-width: 3px;
+  padding: 16px 32px;
+  text-align: center;
+  margin: 4px 4px;
+  transition-duration: .3s;
+}
+
+.outputOn {
+  padding: 16px 32px;
+  text-align: center;
+  font-size: 16px;
+  r: 30;
+  stroke-width: 3px;
+  stroke: black;
+  margin: 4px 4px;
+  fill:  goldenrod;
+  transition-delay: .5s;
+  transition-duration: .3s;
+}
+.shadow{
+  filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+}
+
+.line{
+  stroke: black;
+  transition-duration: .2s;
+}
+
+.lineOn1{
+  stroke: goldenrod;
+  stroke-width: 3px;
+  transition-duration: .3s;
+}
+
+.lineOn2{
+  stroke: goldenrod;
+  stroke-width: 3px;
+  transition-duration: .5s;
+  transition-delay: .2s;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
