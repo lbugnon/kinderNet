@@ -74,6 +74,7 @@ function Network(props) {
         <svg width={width} height={height} className={"shadow"}>
             {lines}
             {layers}
+            <embed src={props.imgSrc} x={100} y={100} width={100} height={100}/>
         </svg>
 );
 }
@@ -167,7 +168,7 @@ class KinderNet extends React.Component{
         const entry = {imgSrc}
         this.serverCall("/clasificar/", entry)
         this.setState({classify: true, outputOn: this.state.category})
-    }
+        }
 
     captureGlobalEvent(e) {
         console.log(e.key)
@@ -176,7 +177,7 @@ class KinderNet extends React.Component{
             const imgSrc = this.webcam.getScreenshot()
             const category = Number(e.key)-1
             const entry = {category, imgSrc}
-            this.setState({classify: false, category, outputOn: Number(e.key)-1})
+            this.setState({classify: false, category, outputOn: Number(e.key)-1, imgSrc})
             this.serverCall("/entrenar/",entry)
 
         }
@@ -240,7 +241,7 @@ class KinderNet extends React.Component{
                     <Grid item lg={8}>
                         <Container>
                             <Network active = {this.state.outputOn} onTransitionEnd = {this.handleTransitionEnd}
-                                     size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
+                                     imgSrc={this.state.imgSrc} size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
                         </Container>
                     </Grid>
                 </Grid>
