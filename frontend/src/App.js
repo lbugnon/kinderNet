@@ -12,8 +12,7 @@ const useTimer = true
 
 // SampleCounter ===================================
 function SampleCounter(props){
-    let samplesList = props.n_samples .map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
-
+    let samplesList = props.n_samples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
     return(
         <ul>{samplesList}</ul>
     );
@@ -38,11 +37,13 @@ function Network(props){
         case 2:
             nunits = [4, 5, props.noutputs]
             break
+        default:
+            break
     }
     const xpos = [-1, 0, 1].map((x, k) => x * layer_sep + xcenter)
     var layers = Array(3)
     var ypos = Array(3)
-    for (var i = 0; i < layers.length; i++) {
+    for (let i = 0; i < layers.length; i++) {
         ypos[i] = Array.from(Array(nunits[i]).keys()).map((x, k) => height/2 + unit_sep[i] * (k - nunits[i] / 2))
         layers[i] = ypos[i].map((x, k) => <circle key={k} onTransitionEnd={props.onTransitionEnd} className={(i === layers.length-1 &&  props.active === k )? "outputOn" : "output"}
                                                   cx={xpos[i]} cy={x} /> )
@@ -74,7 +75,7 @@ function Network(props){
                                                                width={im_height} height={im_height} preserveAspectRatio="xMidYMid slice"/>)
 
     return (
-        <svg width={width} height={height} className={"shadow"}>
+            <svg width={width} height={height} className={"shadow"} xmlns={"http://www.w3.org/2000/svg"}>
             {lines}
             {layers}
             {category_display}
