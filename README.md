@@ -40,5 +40,5 @@ Desde la carpeta raiz del repositorio:
     ```
     npm start --prefix frontend/
     ```
-    La aplicación debería abrirse automáticamente en [http://localhost:3000](http://localhost:3000).
+    La aplicación debería abrirse automáticamente en [http://localhost:3000](http://localhost:3000). Si el puerto 3000 esta ocupado, en esta consola se sugerirá otro puerto.
 
