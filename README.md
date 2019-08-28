@@ -25,7 +25,7 @@ Desde la carpeta raiz del repositorio:
     npm --prefix frontend/ install react-scripts react-webcam @material-ui/core
     ```
 
-3. Explorador web: Por lo pronto funciona en Chrome/Chromium > 76 y Opera > 69. En Firefox esta fallando el dibujo SVG.
+3. Explorador web: Por lo pronto funciona bien en Chrome/Chromium > 76 y Opera > 69. En Firefox y Edge esta fallando el dibujo SVG. En IE no anda. 
 
 ## Levantar la aplicación (en "modo rápido")
 - Levantar el servidor: desde el directorio raiz del proyecto ejecutar 
