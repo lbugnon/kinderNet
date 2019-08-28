@@ -5,9 +5,11 @@ Este repositorio es un proyecto de aplicación web para aprender sobre redes neu
 *Autores (por orden alfabético): L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C. Yones.*   
 ### Instalación
 Desde la carpeta raiz del repositorio:
-1. Servidor
-1.1 Instalar [Python>=3.5](https://www.python.org/downloads/). 
-1.2 Instalar los modulos de Python.
+1. Instalación del servidor
+    
+    1.1 Instalar [Python>=3.5](https://www.python.org/downloads/). 
+
+    1.2 Instalar los modulos de Python.
     Con pip:
     ```bash
     python -m pip install --user -r requirements.txt
@@ -18,9 +20,11 @@ Desde la carpeta raiz del repositorio:
     ```
     En caso de que surjan errores en la instalación del paquete torch con los repositorios tradicionales (pip o conda), seguir las instrucciones para su sistema operativo en [https://pytorch.org/](https://pytorch.org/).
     
-2. Interfaz de usuario:
-2.1 Instalar [node.js](https://nodejs.org/en/download/).
-2.2 Instalar los paquetes necesarios con el siguiente comando. Estos paquetes se instalarán localmente en el directorio "frontend/node_modules".
+2. Instalación de la interfaz de usuario:
+    
+    2.1 Instalar [node.js](https://nodejs.org/en/download/).
+
+    2.2 Instalar los paquetes necesarios con el siguiente comando. Estos paquetes se instalarán localmente en el directorio "frontend/node_modules".
     ``` 
     npm --prefix frontend/ install react-scripts react-webcam @material-ui/core
     ```
