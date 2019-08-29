@@ -110,7 +110,7 @@ class Classify(Resource):
         net = KinderNet(params)
         out = int(net.run_test(img))
 
-        return {"category": out}
+        return {"category": out, "output_on": out}
 
 
 class ChangeNet(Resource):

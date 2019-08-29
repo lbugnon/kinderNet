@@ -6,4 +6,4 @@
  "net_size": 0,
  "batch": 16,
  "img_size": 350,
- "debug": 0}
+ "debug": 1}

@@ -3,20 +3,34 @@ import './App.css';
 import Webcam from "react-webcam";
 import Grid from '@material-ui/core/Grid'
 import Container from '@material-ui/core/Container'
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 // Definiciones globales
 const server_url = "http://localhost:5000"
 const min_categories = 2
 const max_categories = 4
 const use_timer = true
-const base_timer = 4000
+const base_timer = 2000
 
 // SampleCounter ===================================
 function SampleCounter(props){
     let samplesList = props.n_samples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
     return(
-        <ul>{samplesList}</ul>
+       <ul>{samplesList}</ul>
     );
+
+    // let counter = Array(props.n_samples.length)
+    // for (var i = 0; i< counter.length; i++){
+    //     counter[i] = Array(props.n_samples[i])
+    //     for (var j = 0; j< counter[i]; j++){
+    //         counter[i][j] = <circle r={5} x={j} y={i} fill={"black"}/>
+    //     }
+    // }
+    // return(
+    //     <svg width={300} height={200}>
+    //         {counter}
+    //     </svg>
+    // );
 }
 
 // Network
@@ -97,15 +111,38 @@ function Network(props){
                                                                viewBox={"0 0 1 1"}
                                                                width={im_height} height={im_height} preserveAspectRatio="xMidYMid slice"/>)
 
+
     return (
             <svg  width={width} height={height} className={"shadow"}>
             {lines}
             {layers}
             {category_display}
+            <Switch r={12} w={layer_sep/5} x={xpos[1]} on={props.classifying} y={height/2 + 200} // dynamic y={height/2+nunits[1]*(40+10*(nunits[2]==4))}
+            text_on={"Clasificando"} text_off={"Aprendiendo"}/>
         </svg>
     );
 }
 
+function Switch (props) {
+
+    const x = props.x + ( -1  + props.on * 2) * props.w/2
+
+    const xpos = props.x - 4.5*props.w
+
+    //<rect className={"text-base"} x={xpos-10} y = {props.y-props.r} width={140} height = {2*props.r}/>
+
+    return(
+        <svg>
+            <rect className={props.on ? "switch-base switch-base-on": "switch-base"} rx={props.r}
+                  x={props.x-props.w/2-props.r} y={props.y-props.r} width={props.w+2*props.r} height = {2*props.r}/>
+            <circle className={props.on ? "switch switch-on": "switch"} cx={x} cy={props.y} r={props.r*1.4}/>
+
+            <text className={props.on ? "text": "text text-on"} x={xpos} y={props.y+7}>{props.text_off}</text>
+
+            <text className={props.on ? "text  text-on": "text"} x={props.x + 1.3*props.w} y={props.y+7}>{props.text_on}</text>
+           </svg>
+    );
+}
 
 
 // event listener
@@ -129,12 +166,14 @@ class KinderNet extends React.Component{
         this.state={
             category: -1,
             classify: false,
+            classifying: false,
             net_size: 0, // mayor valor, mas compleja la red
             category_names: [1,2],
             images: [[],[]],
             loss: 0,
             n_samples : [0,0], // n_samples  de la clase actual durante el entrenamiento
             output_on: -1,
+            trained: false,
             timer: base_timer
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
@@ -164,39 +203,43 @@ class KinderNet extends React.Component{
 
     handleTimerOut(){
 
-
-        let time = this.state.timer
-
-        if(this.state.category === -1){
-            setTimeout(this.handleTimerOut,time)
+        if(!this.state.trained){
+            setTimeout(this.handleTimerOut,this.state.timer)
+            return
+        }
+        if (!this.state.classify){
+            this.setState({classify: true})
+            setTimeout(this.handleTimerOut,this.state.timer)
             return
         }
 
+        this.setState({timer : 500})
+        this.classifyPic()
 
-        if(this.state.classify){
-            this.classifyPic()
-            time = 500
-        }
-        else
-            this.setState({classify: true}) // comienza modo clasificación
-
-        setTimeout(this.handleTimerOut,time)
+        setTimeout(this.handleTimerOut,this.state.timer)
         return
     }
 
+    // async to wait for classification results
     serverCall(url,entry){
-        fetch(server_url + url, {
-            method: "POST",
-            body: JSON.stringify(entry),
-            headers: new Headers({"content-type": "application/json"})
-        }).then(response => response.json()).then(json => this.setState(json))
+
+        const res = async () => {
+            return await fetch(server_url + url, {
+                method: "POST",
+                body: JSON.stringify(entry),
+                headers: new Headers({"content-type": "application/json"})
+            })
+        }
+        return res().then(response => response.json()).then(json => this.setState(json))
+        // TODO parece que el asyncc no esta funcionando
     }
 
     classifyPic(){
         const imgSrc = this.webcam.getScreenshot()
         const entry = {imgSrc}
-        this.serverCall("/clasificar/", entry)
-        this.setState({classify: true, output_on: this.state.category})
+        //this.setState({category: -1})
+        const response = this.serverCall("/clasificar/", entry)
+        /this.setState({classify: true, classifying: true})
         }
 
     captureGlobalEvent(e) {
@@ -207,15 +250,16 @@ class KinderNet extends React.Component{
             const category = Number(e.key)-1
             images[category] = this.webcam.getScreenshot()
             const entry = {category, imgSrc: images[category]}
-            this.setState({classify: false, category, output_on: Number(e.key)-1, images})
-            this.serverCall("/entrenar/",entry)
-
+            this.setState({classify: false, classifying: false,  category, output_on: Number(e.key)-1,
+                images, timer: base_timer, trained: true})
+            const response = this.serverCall("/entrenar/",entry)
+            response.then(json => this.setState(json))
         }
 
         // test
         if (e.key.toLowerCase() === "c") {
             this.classifyPic()
-            this.setState({timer: base_timer, category: -1})
+            this.setState({timer: 500})
 
         }
 
@@ -237,7 +281,7 @@ class KinderNet extends React.Component{
                     this.setState({net_size: this.state.net_size-1, category: -1})
             const entry = {net_size: this.state.net_size, n_categories: this.state.category_names.length}
             this.serverCall("/modificarRed/",entry)
-
+            this.setState({trained: false, timer: base_timer})
         }
 
     }
@@ -245,6 +289,7 @@ class KinderNet extends React.Component{
     handleTransitionEnd(){
         this.setState({output_on: -1})
     }
+
 
 
 
@@ -272,7 +317,8 @@ class KinderNet extends React.Component{
                     <Grid item lg={8}>
                         <Container>
                             <Network active = {this.state.output_on} onTransitionEnd = {this.handleTransitionEnd}
-                                     images={this.state.images} size={this.state.net_size} n_outputs={this.state.category_names.length}/>
+                                     images = {this.state.images} size = {this.state.net_size} n_outputs = {this.state.category_names.length}
+                            classifying = {this.state.classifying}/>
                         </Container>
                     </Grid>
                 </Grid>
@@ -287,7 +333,13 @@ class KinderNet extends React.Component{
 
 function App() {
   return (
-      <KinderNet />
+      <React.Fragment>
+          <CssBaseline />
+          <div>
+              <KinderNet />
+          </div>
+      </React.Fragment>
+
   );
 }
 
