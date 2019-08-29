@@ -83,7 +83,10 @@ function Network(props){
                         style += " hidden"
 
 
-                lines[ind] = <line key={ind} x1={xpos[i]} y1={ypos[i][j]} x2={xpos[i+1]} y2={ypos[i+1][z]}
+                //lines[ind] = <line key={ind} x1={xpos[i]} y1={ypos[i][j]} x2={xpos[i+1]} y2={ypos[i+1][z]}
+                //                   className={style} strokeWidth={"1"} />
+                lines[ind] = <path key={ind}
+                                   d={"M"+ xpos[i].toString() +" "+ ypos[i][j].toString()+" L" + xpos[i+1].toString() +" "+ ypos[i+1][z].toString()}
                                    className={style} strokeWidth={"1"} />
                 ind++
             }
