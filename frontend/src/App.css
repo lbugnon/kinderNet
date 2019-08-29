@@ -28,16 +28,15 @@
   text-align: center;
   margin: 4px 4px;
   transition-duration: .3s;
+  opacity: 1;
 }
 
-.output_on {
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
+.hidden {
+  opacity: 0;
+}
+
+.output-on {
   r: 30;
-  stroke-width: 3px;
-  stroke: black;
-  margin: 4px 4px;
   fill:  goldenrod;
   transition-delay: .5s;
   transition-duration: .3s;
@@ -48,16 +47,16 @@
 
 .line{
   stroke: black;
-  transition-duration: .2s;
+  transition-duration: .3s;
 }
 
-.lineOn1{
+.line-on1{
   stroke: goldenrod;
   stroke-width: 3px;
   transition-duration: .3s;
 }
 
-.lineOn2{
+.line-on2{
   stroke: goldenrod;
   stroke-width: 3px;
   transition-duration: .5s;

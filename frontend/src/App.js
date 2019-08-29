@@ -28,6 +28,12 @@ function Network(props){
     const layer_sep = 200
     const unit_sep = [90, 90, 110]
     var nunits
+
+    const xpos = [-1, 0, 1].map((x, k) => x * layer_sep + xcenter)
+    var layers = Array(3)
+    var ypos = Array(3)
+
+    const max_units = [4, 5, max_categories]
     switch (props.size) {
         case 0:
             nunits = [2, 3, props.n_outputs]
@@ -41,30 +47,42 @@ function Network(props){
         default:
             break
     }
-    const xpos = [-1, 0, 1].map((x, k) => x * layer_sep + xcenter)
-    var layers = Array(3)
-    var ypos = Array(3)
+
     for (let i = 0; i < layers.length; i++) {
-        ypos[i] = Array.from(Array(nunits[i]).keys()).map((x, k) => height/2 + unit_sep[i] * (k - nunits[i] / 2))
-        layers[i] = ypos[i].map((x, k) => <circle key={k} onTransitionEnd={props.onTransitionEnd}
-                                                  className={(i === layers.length-1 &&  props.active === k )? "output_on" : "output"}
-                                                  cx={xpos[i]} cy={x} /> )
+        layers[i] = Array(max_units[i])
+        ypos[i] =  Array(max_units[i])
+        for (let j = 0; j < max_units[i]; j++) {
+
+            style = "output"
+            ypos[i][j] = height / 2 + unit_sep[i] * (j - nunits[i] / 2)
+            if (i === layers.length - 1 && props.active === j)
+                style += " output-on"
+            if (j >= nunits[i])
+                style += " hidden"
+
+            layers[i][j] = <circle key={j} onTransitionEnd={props.onTransitionEnd} className={style}
+                                   cx={xpos[i]} cy={ypos[i][j]}/>
+        }
     }
     // lines
-    var lines = Array((nunits[0]+nunits[2]) * nunits[1])
+    var lines = Array((max_units[0]+max_units[2]) * max_units[1])
     var ind = 0
     var style = 0
     for (var i = 0; i < layers.length-1; i++)
-        for (var j = 0; j < nunits[i]; j++)
-            for (var z = 0; z < nunits[i+1]; z++) {
+        for (var j = 0; j < max_units[i]; j++)
+            for (var z = 0; z < max_units[i+1]; z++) {
                 style = "line"
                 if (props.active !== -1) {
                     if (i + 1 === layers.length - 1) {
                         if (z === props.active)
-                            style = "lineOn2"
+                            style += " line-on2"
                     } else
-                        style = "lineOn1"
-                }
+                        style += " line-on1"
+                    }
+                if (j >= nunits[i] || z >= nunits[i+1])
+                        style += " hidden"
+
+
                 lines[ind] = <line key={ind} x1={xpos[i]} y1={ypos[i][j]} x2={xpos[i+1]} y2={ypos[i+1][z]}
                                    className={style} strokeWidth={"1"} />
                 ind++
