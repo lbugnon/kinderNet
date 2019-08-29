@@ -19,6 +19,7 @@ class KinderNet(nn.Module):
         self.model_dir = params["model_dir"]
         self.img_dir = params["img_dir"]
         self.batch = params["batch"]
+        self.debug = bool(params["debug"])
 
         filters = [12, 24, 32]
         model = []
@@ -59,25 +60,21 @@ class KinderNet(nn.Module):
         Use the current images to do an optimization step.
         :returns: Loss value.
         """
-
         # Dataloader
         dataset = ImageFolder(self.img_dir, transform=transforms.ToTensor())
         data_loader = DataLoader(dataset, batch_size=self.batch, shuffle=True)
         self.train()
 
-        avgloss = 0
-        k = 0
-        for data, label in data_loader:
+        # Takes a small batch after each image update instead of a complete epoch
+        data, label = next(iter(data_loader))
 
-            self.optimizer.zero_grad()
-            out = self.forward(Variable(data))
-            loss = self.criterion(out, Variable(label))
-            loss.backward()
-            self.optimizer.step()
-            avgloss += loss.item()
-            k += 1
-
-        return avgloss/k
+        self.optimizer.zero_grad()
+        out = self.forward(Variable(data))
+        loss = self.criterion(out, Variable(label))
+        loss.backward()
+        self.optimizer.step()
+        
+        return loss.item()
 
     def run_test(self, img: Image):
         """
@@ -93,7 +90,9 @@ class KinderNet(nn.Module):
         out = self.forward(Variable(img))
 
         output = int(torch.argmax(out.detach()))
-        print("Modo test; salida ", out.tolist(), "clase ", output)
+
+        if self.debug:
+            print("Modo test; salida ", out.tolist(), "clase ", output)
 
         return output
 
