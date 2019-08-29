@@ -95,7 +95,7 @@ function Network(props){
                                                                width={im_height} height={im_height} preserveAspectRatio="xMidYMid slice"/>)
 
     return (
-            <svg width={width} height={height} className={"shadow"} xmlns={"http://www.w3.org/2000/svg"}>
+            <svg  width={width} height={height} className={"shadow"}>
             {lines}
             {layers}
             {category_display}

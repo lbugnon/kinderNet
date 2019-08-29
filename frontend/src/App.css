@@ -33,6 +33,7 @@
 
 .hidden {
   opacity: 0;
+  transition-duration: .3s;
 }
 
 .output-on {
@@ -48,6 +49,7 @@
 .line{
   stroke: black;
   transition-duration: .3s;
+
 }
 
 .line-on1{
