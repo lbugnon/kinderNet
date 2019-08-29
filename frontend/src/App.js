@@ -5,10 +5,11 @@ import Grid from '@material-ui/core/Grid'
 import Container from '@material-ui/core/Container'
 
 // Definiciones globales
-const serverUrl = "http://localhost:5000"
-const minCategories = 2
-const maxCategories = 4
-const useTimer = true
+const server_url = "http://localhost:5000"
+const min_categories = 2
+const max_categories = 4
+const use_timer = true
+const base_timer = 4000
 
 // SampleCounter ===================================
 function SampleCounter(props){
@@ -29,13 +30,13 @@ function Network(props){
     var nunits
     switch (props.size) {
         case 0:
-            nunits = [2, 3, props.noutputs]
+            nunits = [2, 3, props.n_outputs]
             break
         case 1:
-            nunits = [3, 4, props.noutputs]
+            nunits = [3, 4, props.n_outputs]
             break
         case 2:
-            nunits = [4, 5, props.noutputs]
+            nunits = [4, 5, props.n_outputs]
             break
         default:
             break
@@ -45,7 +46,8 @@ function Network(props){
     var ypos = Array(3)
     for (let i = 0; i < layers.length; i++) {
         ypos[i] = Array.from(Array(nunits[i]).keys()).map((x, k) => height/2 + unit_sep[i] * (k - nunits[i] / 2))
-        layers[i] = ypos[i].map((x, k) => <circle key={k} onTransitionEnd={props.onTransitionEnd} className={(i === layers.length-1 &&  props.active === k )? "outputOn" : "output"}
+        layers[i] = ypos[i].map((x, k) => <circle key={k} onTransitionEnd={props.onTransitionEnd}
+                                                  className={(i === layers.length-1 &&  props.active === k )? "output_on" : "output"}
                                                   cx={xpos[i]} cy={x} /> )
     }
     // lines
@@ -106,13 +108,13 @@ class KinderNet extends React.Component{
         this.state={
             category: -1,
             classify: false,
-            netSize: 0, // mayor valor, mas compleja la red
-            categoryNames: [1,2],
+            net_size: 0, // mayor valor, mas compleja la red
+            category_names: [1,2],
             images: [[],[]],
             loss: 0,
             n_samples : [0,0], // n_samples  de la clase actual durante el entrenamiento
-            outputOn: -1,
-            timer: 4000
+            output_on: -1,
+            timer: base_timer
         };
         this.captureGlobalEvent = this.captureGlobalEvent.bind(this);
         this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
@@ -126,7 +128,7 @@ class KinderNet extends React.Component{
 
     componentDidMount() {
         // Inicializa el modelo
-        fetch(serverUrl, {
+        fetch(server_url, {
             method: "POST",
             //credentials: "include",
             cache: "no-cache",
@@ -134,8 +136,8 @@ class KinderNet extends React.Component{
         }).then(response => response.json()).then(json => console.log("Init!"))
 
         // Inicializa el timer
-        if(useTimer)
-            setTimeout(this.handleTimerOut,3000)
+        if(use_timer)
+            setTimeout(this.handleTimerOut,base_timer)
 
     }
 
@@ -162,7 +164,7 @@ class KinderNet extends React.Component{
     }
 
     serverCall(url,entry){
-        fetch(serverUrl + url, {
+        fetch(server_url + url, {
             method: "POST",
             body: JSON.stringify(entry),
             headers: new Headers({"content-type": "application/json"})
@@ -173,18 +175,18 @@ class KinderNet extends React.Component{
         const imgSrc = this.webcam.getScreenshot()
         const entry = {imgSrc}
         this.serverCall("/clasificar/", entry)
-        this.setState({classify: true, outputOn: this.state.category})
+        this.setState({classify: true, output_on: this.state.category})
         }
 
     captureGlobalEvent(e) {
-        console.log(e.key)
+
         // entrenamiento
-        if (this.state.categoryNames.includes(Number(e.key))) {
+        if (this.state.category_names.includes(Number(e.key))) {
             let images = this.state.images.slice()
             const category = Number(e.key)-1
             images[category] = this.webcam.getScreenshot()
             const entry = {category, imgSrc: images[category]}
-            this.setState({classify: false, category, outputOn: Number(e.key)-1, images})
+            this.setState({classify: false, category, output_on: Number(e.key)-1, images})
             this.serverCall("/entrenar/",entry)
 
         }
@@ -192,26 +194,27 @@ class KinderNet extends React.Component{
         // test
         if (e.key.toLowerCase() === "c") {
             this.classifyPic()
+            this.setState({timer: base_timer, category: -1})
 
         }
 
         // Cambiar la cantidad de salidas
         if (["+","-","a","z"].includes(e.key.toLowerCase())) {
-            let categoryNames = this.state.categoryNames.slice()
+            let category_names = this.state.category_names.slice()
             if (e.key.toLowerCase() === "a")
-                categoryNames.push(Number(categoryNames[categoryNames.length - 1]) + 1)
+                category_names.push(Number(category_names[category_names.length - 1]) + 1)
             if (e.key.toLowerCase() === "z")
-                categoryNames.pop()
-            if ( minCategories <=  categoryNames.length && categoryNames.length <= maxCategories)
-                this.setState({categoryNames, images: Array(categoryNames.length)})
+                category_names.pop()
+            if ( min_categories <=  category_names.length && category_names.length <= max_categories)
+                this.setState({category_names, images: Array(category_names.length), category: -1})
             if(e.key === "+")
-                if (this.state.netSize < 2)
-                    this.setState({netSize: this.state.netSize + 1})
+                if (this.state.net_size < 2)
+                    this.setState({net_size: this.state.net_size + 1, category: -1})
 
             if(e.key === "-")
-                if (this.state.netSize > 0)
-                    this.setState({netSize: this.state.netSize-1})
-            const entry = {netSize: this.state.netsize, n_categories: this.state.categoryNames.length}
+                if (this.state.net_size > 0)
+                    this.setState({net_size: this.state.net_size-1, category: -1})
+            const entry = {net_size: this.state.net_size, n_categories: this.state.category_names.length}
             this.serverCall("/modificarRed/",entry)
 
         }
@@ -219,7 +222,7 @@ class KinderNet extends React.Component{
     }
 
     handleTransitionEnd(){
-        this.setState({outputOn: -1})
+        this.setState({output_on: -1})
     }
 
 
@@ -247,8 +250,8 @@ class KinderNet extends React.Component{
                     </Grid>
                     <Grid item lg={8}>
                         <Container>
-                            <Network active = {this.state.outputOn} onTransitionEnd = {this.handleTransitionEnd}
-                                     images={this.state.images} size={this.state.netSize} noutputs={this.state.categoryNames.length}/>
+                            <Network active = {this.state.output_on} onTransitionEnd = {this.handleTransitionEnd}
+                                     images={this.state.images} size={this.state.net_size} n_outputs={this.state.category_names.length}/>
                         </Container>
                     </Grid>
                 </Grid>

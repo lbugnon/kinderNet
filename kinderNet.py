@@ -65,16 +65,20 @@ class KinderNet(nn.Module):
         data_loader = DataLoader(dataset, batch_size=self.batch, shuffle=True)
         self.train()
 
-        # Takes a small batch after each image update instead of a complete epoch
+        # Takes a small batch after each image update instead of a complete epoch (not working)
         data, label = next(iter(data_loader))
-
+        print(label)
+        avg_loss = 0
+        k = 0
+        #for data, label in data_loader:
         self.optimizer.zero_grad()
         out = self.forward(Variable(data))
         loss = self.criterion(out, Variable(label))
         loss.backward()
         self.optimizer.step()
-        
-        return loss.item()
+        avg_loss += loss.item()
+        k += 1
+        return avg_loss/k
 
     def run_test(self, img: Image):
         """
