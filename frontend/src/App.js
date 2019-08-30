@@ -20,17 +20,19 @@ function SampleCounter(props){
     );
 
     // let counter = Array(props.n_samples.length)
-    // for (var i = 0; i< counter.length; i++){
+    // const step = 5
+    // for (var i = 0; i< props.n_samples.length; i++){
     //     counter[i] = Array(props.n_samples[i])
-    //     for (var j = 0; j< counter[i]; j++){
-    //         counter[i][j] = <circle r={5} x={j} y={i} fill={"black"}/>
+    //     for (var j = 0; j< props.n_samples[i]; j++){
+    //         counter[i][j] = <circle r={5} x={j*step} y={height/2+i} fill={"black"}/>
     //     }
     // }
+    // console.log(counter)
     // return(
     //     <svg width={300} height={200}>
     //         {counter}
     //     </svg>
-    // );
+    //);
 }
 
 // Network
@@ -113,7 +115,7 @@ function Network(props){
 
 
     return (
-            <svg  width={width} height={height} className={"shadow"}>
+        <svg  width={width} height={height} className={"shadow"}>
             {lines}
             {layers}
             {category_display}
@@ -293,15 +295,21 @@ class KinderNet extends React.Component{
 
 
 
-    render(){
 
+    render(){
+        const videoConstraints = {
+            width: 350,
+            height: 350,
+            facingMode: "user"
+        };
         return(
             <div style={{padding: 50}}>
                 <Grid container spacing={0} justify="center" align="center">
                     <EventListener onKeyUp={this.captureGlobalEvent}/>
-                    <Grid item lg={4}>
+                    <Grid item sm={4}>
                         <Container style={{padding: 50}}>
                             <Webcam
+                                videoConstraints = {videoConstraints}
                                 audio={false}
                                 ref={this.setRef}
                                 screenshotFormat="image/png"
@@ -314,7 +322,7 @@ class KinderNet extends React.Component{
                         </Container>
                         </Container>
                     </Grid>
-                    <Grid item lg={8}>
+                    <Grid item sm={8}>
                         <Container>
                             <Network active = {this.state.output_on} onTransitionEnd = {this.handleTransitionEnd}
                                      images = {this.state.images} size = {this.state.net_size} n_outputs = {this.state.category_names.length}
