@@ -20,12 +20,13 @@ def data2img(data: str) -> Image:
     data = data.split(";")[1].split(",")[1]
     image_bytes = io.BytesIO(base64.b64decode(data))
     img = Image.open(image_bytes)
-    
+
     # Crop 25% of the margins (TODO check webcam compat)
     # w, h = img.size
     # wc = w//4
     # hc = h//5
     # img = img.crop((wc, hc, w-wc, h-hc))
+    img = img.resize([128, 128])
     print("Tamaño de imagen guardado", img.size)
     return img
 
@@ -69,7 +70,7 @@ class Train(Resource):
     Train model. Incoming images are saved to the img_dir, and then the network is trained with a batch.
     """
     def post(self):
-      
+
         parser = reqparse.RequestParser()
         parser.add_argument('category', type=int, help='Category to be classified')
         parser.add_argument('imgSrc', type=str, help='Image data')
@@ -88,11 +89,11 @@ class Train(Resource):
         params["n_samples"][category] += 1
 
         json.dump(params, open(conf_file, "w"))
-        
+
         return {"loss": loss, "n_samples": params["n_samples"]}
 
 
-class Classify(Resource): 
+class Classify(Resource):
     """
     Use the trained network to classify the incoming image.
     """
@@ -105,7 +106,7 @@ class Classify(Resource):
         img = data2img(args["imgSrc"])
 
         img.save("{}/test.png".format(params["img_dir"]))
-        
+
         net = KinderNet(params)
         out = int(net.run_test(img))
 
@@ -138,6 +139,6 @@ class ChangeNet(Resource):
 
         if os.path.exists(params["model_dir"] + "model.par"):
             os.remove(params["model_dir"] + "model.par")
-        
+
         return {"network_img": "TODO_url", "n_samples": params["n_samples"]}
 

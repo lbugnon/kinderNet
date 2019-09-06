@@ -29,11 +29,11 @@ class KinderNet(nn.Module):
             else:
                 filter_in = filter_out
             filter_out = f
-            model.append(nn.Conv2d(filter_in, filter_out, kernel_size=5))
+            model.append(nn.Conv2d(filter_in, filter_out, kernel_size=3))
             model.append(nn.ELU())
             model.append(nn.BatchNorm2d(filter_out))
             model.append(nn.MaxPool2d((2, 2)))
-            
+
         model.append(nn.AdaptiveAvgPool2d(1))
         self.model = nn.Sequential(*model)
         self.linear = nn.Linear(filter_out, n_cat)
