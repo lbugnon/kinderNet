@@ -19,6 +19,7 @@ class KinderNet(nn.Module):
         self.model_dir = params["model_dir"]
         self.img_dir = params["img_dir"]
         self.batch = params["batch"]
+        self.debug = bool(params["debug"])
 
         filters = [12, 24, 32]
         model = []
@@ -28,11 +29,11 @@ class KinderNet(nn.Module):
             else:
                 filter_in = filter_out
             filter_out = f
-            model.append(nn.Conv2d(filter_in, filter_out, kernel_size=5))
+            model.append(nn.Conv2d(filter_in, filter_out, kernel_size=3))
             model.append(nn.ELU())
             model.append(nn.BatchNorm2d(filter_out))
             model.append(nn.MaxPool2d((2, 2)))
-            
+
         model.append(nn.AdaptiveAvgPool2d(1))
         self.model = nn.Sequential(*model)
         self.linear = nn.Linear(filter_out, n_cat)
@@ -59,25 +60,25 @@ class KinderNet(nn.Module):
         Use the current images to do an optimization step.
         :returns: Loss value.
         """
-
         # Dataloader
         dataset = ImageFolder(self.img_dir, transform=transforms.ToTensor())
         data_loader = DataLoader(dataset, batch_size=self.batch, shuffle=True)
         self.train()
 
-        avgloss = 0
+        # Takes a small batch after each image update instead of a complete epoch (not working)
+        data, label = next(iter(data_loader))
+        print(label)
+        avg_loss = 0
         k = 0
-        for data, label in data_loader:
-
-            self.optimizer.zero_grad()
-            out = self.forward(Variable(data))
-            loss = self.criterion(out, Variable(label))
-            loss.backward()
-            self.optimizer.step()
-            avgloss += loss.item()
-            k += 1
-
-        return avgloss/k
+        #for data, label in data_loader:
+        self.optimizer.zero_grad()
+        out = self.forward(Variable(data))
+        loss = self.criterion(out, Variable(label))
+        loss.backward()
+        self.optimizer.step()
+        avg_loss += loss.item()
+        k += 1
+        return avg_loss/k
 
     def run_test(self, img: Image):
         """
@@ -93,7 +94,9 @@ class KinderNet(nn.Module):
         out = self.forward(Variable(img))
 
         output = int(torch.argmax(out.detach()))
-        print("Modo test; salida ", out.tolist(), "clase ", output)
+
+        if self.debug:
+            print("Modo test; salida ", out.tolist(), "clase ", output)
 
         return output
 

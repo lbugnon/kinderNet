@@ -42,3 +42,8 @@ Desde la carpeta raiz del repositorio:
     ```
     La aplicación debería abrirse automáticamente en [http://localhost:3000](http://localhost:3000). Si el puerto 3000 esta ocupado, en esta consola se sugerirá otro puerto.
 
+## Controles
+- Teclas numéricas para entrenar ("1" entrena con la entrada actual para la clase 1, "2" para la clase 2, ...).
+- "a" y "z": Cambia la cantidad de salidas.
+- "+" y "-": Cambia el tamaño de la red.
+- "c": Clasifica la entrada actual. Por defecto luego de 4 segundos se activa la clasificación automáticamente. 

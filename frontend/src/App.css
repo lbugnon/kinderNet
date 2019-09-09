@@ -5,11 +5,19 @@
 .Webcam{
   borderRadius: 10px;
   object-fit: none;
-  width: 350px;
-  height: 350px;
+  width: 320px;
+  height: 320px;
   border: 2px solid;
 }
 
+.face{
+  font-size: 50px;
+  text-anchor: middle;
+   transition-duration: .3s;
+  stroke: black;
+  stroke-width: 1;
+  opacity: 1;
+}
 
 .neuron{
   height: 50px;
@@ -28,16 +36,16 @@
   text-align: center;
   margin: 4px 4px;
   transition-duration: .3s;
+  opacity: 1;
 }
 
-.outputOn {
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
+.hidden {
+  opacity: 0;
+  transition-duration: .3s;
+}
+
+.output-on {
   r: 30;
-  stroke-width: 3px;
-  stroke: black;
-  margin: 4px 4px;
   fill:  goldenrod;
   transition-delay: .5s;
   transition-duration: .3s;
@@ -48,16 +56,76 @@
 
 .line{
   stroke: black;
+  transition-duration: .3s;
+
+}
+
+.switch{
+  fill: darkgray;
+  stroke-width: 2px;
+  padding: 16px 32px;
+  text-align: center;
+  margin: 4px 4px;
+  transition-duration: .3s;
+}
+
+.switch-on{
+  transition-duration: .3s;
+  fill: goldenrod;
+}
+
+.switch-base{
+  fill: lightgray;
+  stroke-width: 3px;
+  padding: 16px 32px;
+  text-align: center;
+  margin: 4px 4px;
+  transition-duration: .3s;
+  opacity: 1;
+}
+
+.text-base{
+  fill: whitesmoke;
+  padding: 16px 32px;
+  text-align: center;
+  margin: 4px 4px;
   transition-duration: .2s;
 }
 
-.lineOn1{
+.switch-base-on{
+  fill: palegoldenrod;
+  transition-duration: .2s;
+}
+
+.text{
+  stroke-width: 1;
+  font-family: Roboto;
+  font-size: 25px;
+  opacity: .3;
+  text-shadow: none;
+  transition-duration: .3s;
+
+}
+
+.text-on{
+  stroke-width: 1;
+  font-family: Roboto;
+  font-size: 25px;
+  opacity: 1;
+    transition-duration: .3s;
+}
+
+.text-on{
+  font: bold;
+}
+
+.line-on1{
   stroke: goldenrod;
   stroke-width: 3px;
   transition-duration: .3s;
 }
 
-.lineOn2{
+.line-on2{
   stroke: goldenrod;
   stroke-width: 3px;
   transition-duration: .5s;
