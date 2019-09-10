@@ -8,27 +8,34 @@
   width: 320px;
   height: 320px;
   border: 2px solid;
+  transform: scaleX(-1);
+}
+
+.invx{
+  transform: scale(-1,1);
 }
 
 .face{
   stroke: black;
   stroke-width: 1;
   opacity: 1;
-  transition-duration: 5s;
+  transition-duration: .3s;
 }
 
-.neuron{
-  height: 50px;
-  width: 50px;
-  background-color: #bbb;
-  border-radius: 50%;
-  display: inline-block;
+.scaler{
+  transform: scale(.1);
 }
+.neuron{
+opacity: 1;
+}
+
+.neuron-base{
+  fill: white;
+}
+
 
 .output {
-  fill: darkgrey;
   r: 25;
-  stroke: black;
   stroke-width: 3px;
   padding: 16px 32px;
   text-align: center;
@@ -36,6 +43,19 @@
   transition-duration: .3s;
   opacity: 1;
 }
+
+.visible{
+  transition-duration: .3s;
+  opacity: 1;
+}
+
+.neuron-background {
+  r: 25;
+  fill: white;
+  transition-duration: .3s;
+  opacity: 1;
+}
+
 
 .hidden {
   opacity: 0;
@@ -54,8 +74,9 @@
   fill:  goldenrod;
   transition-duration: .3s;
 }
-.face-on0 {
-  transition-duration: 6s;
+.neuron-on0 {
+  fill: goldenrod;
+  transition-duration: .3s;
 }
 .line-on1{
   stroke: goldenrod;
@@ -76,7 +97,8 @@
   transition-duration: .5s;
   transition-delay: .2s;
 }
-.face-on1 {
+.neuron-on1 {
+  fill:  goldenrod;
   transition-duration: .5s;
   transition-delay: .2s;
 }
@@ -87,8 +109,9 @@
   transition-delay: .5s;
   transition-duration: .3s;
 }
-.face-on2 {
-  transition-duration: 3s;
+.neuron-on2 {
+  fill:  goldenrod;
+  transition-duration: .5s;
   transition-delay: .2s;
 }
 
