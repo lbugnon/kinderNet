@@ -4,68 +4,76 @@ import Webcam from "react-webcam";
 import Grid from '@material-ui/core/Grid'
 import Container from '@material-ui/core/Container'
 import CssBaseline from '@material-ui/core/CssBaseline';
-import sleepy from "./sleepy.svg"
-import awake from "./awake.svg"
 
 
 // Definiciones globales
 const server_url = "http://localhost:5000"
 const min_categories = 2
 const max_categories = 4
-const use_timer = true
+const use_timer = false
 const base_timer = 2000
 
 // SampleCounter ===================================
 function SampleCounter(props){
-    let samplesList = props.n_samples.map((n,i) => <li key={i}>Ejemplos de la clase {i}: {n}</li>)
-    return(
-       <ul>{samplesList}</ul>
-    );
-
-    // let counter = Array(props.n_samples.length)
-    // const step = 5
-    // for (var i = 0; i< props.n_samples.length; i++){
-    //     counter[i] = Array(props.n_samples[i])
-    //     for (var j = 0; j< props.n_samples[i]; j++){
-    //         counter[i][j] = <circle r={5} x={j*step} y={height/2+i} fill={"black"}/>
-    //     }
-    // }
-    // console.log(counter)
-    // return(
-    //     <svg width={300} height={200}>
-    //         {counter}
-    //     </svg>
-    //);
+    let samplesList = props.n_samples.map((n,i) => <li key={i}>Ejemplos del objeto {i+1}: {n}</li>)
+    return(<ul>{samplesList}</ul>);
 }
 
 function Neuron(props){
 
     let style = "output"
     let face_style = "face"
-    if(props.is_on)
-        style += " output-on"
+    //if(props.is_on)
+    //    style += " output-on"
     if(props.is_hidden){
         style += " hidden"
         face_style += " hidden"
         }
-    let text_style = style + " sleepy-face"
 
-    if(props.is_on){
-        const leye =  <circle cx={props.x-10} cy={props.y-10} r={5} className={face_style} />
-        const reye =  <circle cx={props.x+10} cy={props.y-10} r={5} className={face_style} />
-        const mouth =  <path d={"M"+(props.x-11).toString()+" "+(props.y+10).toString()+" L"+(props.x+11).toString()+" "+(props.y+10).toString()}
-                         className={face_style}/>
+    let leye, reye, mouth
+    const eyex = 7
+    const eyey = 5
+    const eyer = 3
+
+    let transition_end = ""
+    let smiley_face = false
+    console.log(props.on, props.layer, props.output_active)
+    if (props.is_on){
+        if(props.layer <= 1){
+            style += " output-on"+props.layer.toString()
+            face_style += " face-on"+props.layer.toString()
+            smiley_face = true
+        }
+        if(props.layer === 2 && props.output_active) {
+            smiley_face = true
+            style += " output-on2"
+            face_style += " face-on"+props.layer.toString()
+            transition_end = props.onTransitionEnd
+        }
+    }
+    let mline;
+    if(smiley_face) {
+        leye = <circle cx={props.x - eyex} cy={props.y - eyey} r={eyer} className={face_style}/>
+        reye = <circle cx={props.x + eyex} cy={props.y - eyey} r={eyer} className={face_style}/>
+        mline = "M" + (props.x - 11).toString() + " " + (props.y + 10).toString() +
+    " Q"+ props.x.toString() + " " + (props.y + 20).toString() + " " + (props.x + 11).toString() + " " + (props.y + 10).toString()
+    }
     else{
-        const leye =  <circle cx={props.x-10} cy={props.y-10} r={5} className={face_style} />
-        const reye =  <circle cx={props.x+10} cy={props.y-10} r={5} className={face_style} />
-        const mouth =  <path d={"M"+(props.x-11).toString()+" "+(props.y+10).toString()+" L"+(props.x+11).toString()+" "+(props.y+10).toString()}
-                         className={face_style}/>
-    }
+        leye =  <path d={"M"+(props.x-eyex-eyer/2).toString()+" "+(props.y-eyey).toString()+" L"+(props.x-eyex+eyer/2).toString()+" "+(props.y-eyey).toString()}
+                            className={face_style}/>
+        reye =  <path d={"M"+(props.x+eyex-eyer/2).toString()+" "+(props.y-eyey).toString()+" L"+(props.x+eyex+eyer/2).toString()+" "+(props.y-eyey).toString()}
+                            className={face_style}/>
+        mline = "M"+(props.x-11).toString()+" "+(props.y+10).toString()+" L"+(props.x+11).toString()+" "+(props.y+10).toString()
 
     }
+
+    mouth = <path d={mline}
+                  className={face_style}/>
+
+
     return(
         <g>
-            <circle key={props.key} onTransitionEnd={props.onTransitionEnd} className={style}
+            <circle key={props.key} onTransitionEnd={transition_end} className={style}
                     cx={props.x} cy={props.y} />
             {leye}
             {reye}
@@ -112,9 +120,8 @@ function Network(props){
 
             ypos[i][j] = height / 2 + unit_sep[i] * (j - nunits[i] / 2)
 
-
-            layers[i][j] = <Neuron key={j} onTransitionEnd={props.onTransitionEnd} is_on={(i === layers.length - 1 && props.active === j)}
-                                   is_hidden={(j >= nunits[i])}
+            layers[i][j] = <Neuron key={j} onTransitionEnd={props.onTransitionEnd} is_on={(props.active !== -1)}
+                                   is_hidden={(j >= nunits[i])} layer={i} output_active={props.active === j}
                                    x={xpos[i]} y={ypos[i][j]} />
 
 
@@ -160,7 +167,7 @@ function Network(props){
             {layers}
             {category_display}
             <Switch r={12} w={layer_sep/5} x={xpos[1]} on={props.classifying} y={height/2 + 200} // dynamic y={height/2+nunits[1]*(40+10*(nunits[2]==4))}
-            text_on={"Clasificando"} text_off={"Aprendiendo"}/>
+            text_on={"Probando"} text_off={"Aprendiendo"}/>
         </svg>
     );
 }

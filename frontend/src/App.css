@@ -11,12 +11,10 @@
 }
 
 .face{
-  font-size: 50px;
-  text-anchor: middle;
-   transition-duration: .3s;
   stroke: black;
   stroke-width: 1;
   opacity: 1;
+  transition-duration: 5s;
 }
 
 .neuron{
@@ -44,20 +42,59 @@
   transition-duration: .3s;
 }
 
-.output-on {
+
+.line{
+  stroke: black;
+  transition-duration: .3s;
+}
+
+
+.output-on0 {
+  r: 30;
+  fill:  goldenrod;
+  transition-duration: .3s;
+}
+.face-on0 {
+  transition-duration: 6s;
+}
+.line-on1{
+  stroke: goldenrod;
+  stroke-width: 3px;
+  transition-duration: .3s;
+}
+
+
+.line-on2{
+  stroke: goldenrod;
+  stroke-width: 3px;
+  transition-duration: .5s;
+  transition-delay: .2s;
+}
+.output-on1 {
+  r: 30;
+  fill:  goldenrod;
+  transition-duration: .5s;
+  transition-delay: .2s;
+}
+.face-on1 {
+  transition-duration: .5s;
+  transition-delay: .2s;
+}
+
+.output-on2 {
   r: 30;
   fill:  goldenrod;
   transition-delay: .5s;
   transition-duration: .3s;
 }
-.shadow{
-  filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+.face-on2 {
+  transition-duration: 3s;
+  transition-delay: .2s;
 }
 
-.line{
-  stroke: black;
-  transition-duration: .3s;
 
+.shadow{
+  filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
 }
 
 .switch{
@@ -119,24 +156,6 @@
   font: bold;
 }
 
-.line-on1{
-  stroke: goldenrod;
-  stroke-width: 3px;
-  transition-duration: .3s;
-}
-
-.line-on2{
-  stroke: goldenrod;
-  stroke-width: 3px;
-  transition-duration: .5s;
-  transition-delay: .2s;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
-}
 
 .App-header {
   background-color: #282c34;
