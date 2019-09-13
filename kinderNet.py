@@ -2,6 +2,7 @@ import os
 from torch.autograd import Variable
 import torch.nn as nn
 import torch
+import numpy as np
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
@@ -20,8 +21,17 @@ class KinderNet(nn.Module):
         self.img_dir = params["img_dir"]
         self.batch = params["batch"]
         self.debug = bool(params["debug"])
+        self.net_size = params["net_size"]
 
-        filters = [12, 24, 32]
+        if self.net_size == 0:
+            filters = [8, 8, 8]
+            kernels = [3, 3, 3]
+        if self.net_size == 1:
+            filters = [12, 24, 32]
+            kernels = [3, 3, 3]
+        if self.net_size == 2:
+            filters = [24, 32, 32, 64]
+            kernels = [5, 3, 3, 3]
         model = []
         for k, f in enumerate(filters):
             if k == 0:
@@ -29,7 +39,7 @@ class KinderNet(nn.Module):
             else:
                 filter_in = filter_out
             filter_out = f
-            model.append(nn.Conv2d(filter_in, filter_out, kernel_size=3))
+            model.append(nn.Conv2d(filter_in, filter_out, kernel_size=kernels[k]))
             model.append(nn.ELU())
             model.append(nn.BatchNorm2d(filter_out))
             model.append(nn.MaxPool2d((2, 2)))
@@ -38,8 +48,8 @@ class KinderNet(nn.Module):
         self.model = nn.Sequential(*model)
         self.linear = nn.Linear(filter_out, n_cat)
 
-        conv_conf = {"params": self.model.parameters(), "lr": 1e-4}
-        linear_conf = {"params": self.linear.parameters(), "lr": 1e-4}
+        conv_conf = {"params": self.model.parameters(), "lr": 1e-3}
+        linear_conf = {"params": self.linear.parameters(), "lr": 1e-3}
         self.optimizer = torch.optim.Adam([conv_conf, linear_conf])
         self.criterion = torch.nn.CrossEntropyLoss()
 
@@ -67,7 +77,11 @@ class KinderNet(nn.Module):
 
         # Takes a small batch after each image update instead of a complete epoch (not working)
         data, label = next(iter(data_loader))
-        print(label)
+        print(sum(label), len(label))
+        # waits for some data
+        if len(data) < self.batch:
+            return 0
+
         avg_loss = 0
         k = 0
         #for data, label in data_loader:
@@ -77,8 +91,24 @@ class KinderNet(nn.Module):
         loss.backward()
         self.optimizer.step()
         avg_loss += loss.item()
-        k += 1
-        return avg_loss/k
+
+        # "test"
+        dataset = ImageFolder(self.img_dir, transform=transforms.ToTensor())
+        data_loader = DataLoader(dataset, batch_size=self.batch, shuffle=True)
+        self.eval()
+        acc = 0
+        outall = np.array([])
+        for data, label in data_loader:
+            out = np.argmax(self.forward(Variable(data)).detach().numpy(), axis=1)
+            label = label.numpy()
+            # print("out", out)
+            # print("label", label)
+            # print("sum", float(sum(out == label)), "acc", acc)
+            outall = np.concatenate((outall, out == label))
+
+        acc = sum(outall) / len(outall)
+        print(outall, acc)
+        return acc #avg_loss/k
 
     def run_test(self, img: Image):
         """
@@ -106,3 +136,15 @@ class KinderNet(nn.Module):
         :return: None
         """
         torch.save(self.state_dict(), self.model_dir + "model.par")
+
+    # def class_dist(self):
+    #     """
+    #     Weigths samples to generate balanced batches.
+    #     :return: class weights per sample
+    #     """
+    #     label_count = []
+    #     for d in os.listdir(self.img_dir):
+    #         label_count.append(os.listdir(self.img_dir+d))
+    #     w = [labels == c)[0])/len(self.labels) for c in range(len(self.classes))]
+    #
+    #     return max(w)/np.array(w)

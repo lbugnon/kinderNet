@@ -118,13 +118,13 @@ function Network(props){
     const max_units = [4, 5, max_categories]
     switch (props.size) {
         case 0:
-            nunits = [2, 3, props.n_outputs]
+            nunits = [3, 3, props.n_outputs]
             break
         case 1:
             nunits = [3, 4, props.n_outputs]
             break
         case 2:
-            nunits = [4, 5, props.n_outputs]
+            nunits = [3, 5, props.n_outputs]
             break
         default:
             break
@@ -187,6 +187,7 @@ function Network(props){
             <Switch r={12} w={layer_sep/5} x={xpos[1]} on={props.classifying} y={height/2 + 200} // dynamic y={height/2+nunits[1]*(40+10*(nunits[2]==4))}
             text_on={"Probando"} text_off={"Aprendiendo"}/>
         </svg>
+
     );
 }
 
@@ -200,6 +201,7 @@ function Switch (props) {
 
     return(
         <svg>
+            <rect x={xpos-20} y={props.y-30} width = {370} height={60} className={"textBox"}/>
             <rect className={props.on ? "switch-base switch-base-on": "switch-base"} rx={props.r}
                   x={props.x-props.w/2-props.r} y={props.y-props.r} width={props.w+2*props.r} height = {2*props.r}/>
             <circle className={props.on ? "switch switch-on": "switch"} cx={x} cy={props.y} r={props.r*1.4}/>
@@ -226,6 +228,64 @@ class EventListener extends React.Component{
 }
 
 
+// progress bar
+class CircularProgressBar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    // Size of the enclosing square
+    const sqSize = this.props.sqSize;
+    // SVG centers the stroke width on the radius, subtract out so circle fits in square
+    const radius = (this.props.sqSize - this.props.strokeWidth) / 2;
+    // Enclose cicle in a circumscribing square
+    const viewBox = `0 0 ${sqSize} ${sqSize}`;
+    // Arc length at 100% coverage is the circle circumference
+    const dashArray = radius * Math.PI * 2;
+    // Scale 100% coverage overlay with the actual percent
+    const dashOffset = dashArray - dashArray * this.props.percentage / 100;
+
+    return (
+      <svg
+          width={this.props.sqSize}
+          height={this.props.sqSize}
+          viewBox={viewBox}>
+          <circle
+            className="circle-background"
+            cx={this.props.sqSize / 2}
+            cy={this.props.sqSize / 2}
+            r={radius}
+            strokeWidth={`${this.props.strokeWidth}px`} />
+          <circle
+            className="circle-progress"
+            cx={this.props.sqSize / 2}
+            cy={this.props.sqSize / 2}
+            r={radius}
+            strokeWidth={`${this.props.strokeWidth}px`}
+            // Start progress marker at 12 O'Clock
+            transform={`rotate(-90 ${this.props.sqSize / 2} ${this.props.sqSize / 2})`}
+            style={{
+              strokeDasharray: dashArray,
+              strokeDashoffset: dashOffset
+            }} />
+          <text
+            className="circle-text"
+            x="50%"
+            y="50%"
+            dy=".3em"
+            textAnchor="middle">
+            {`${this.props.percentage}%`}
+          </text>
+      </svg>
+    );
+  }
+}
+
+
+
+
 // Kindernet ==========================================
 class KinderNet extends React.Component{
     constructor(props){
@@ -234,10 +294,10 @@ class KinderNet extends React.Component{
             category: -1,
             classify: false,
             classifying: false,
-            net_size: 2, // mayor valor, mas compleja la red
+            net_size: 0, // mayor valor, mas compleja la red
             category_names: [1,2],
             images: [[],[]],
-            loss: 1,
+            accuracy: 0,
             n_samples : [0,0], // n_samples  de la clase actual durante el entrenamiento
             output_on: -1,
             trained: false,
@@ -312,7 +372,7 @@ class KinderNet extends React.Component{
     captureGlobalEvent(e) {
 
         // entrenamiento
-        if (this.state.category_names.includes(Number(e.key))) {
+        if (this.state.category_names.includes(Number(e.key)) && this.state.output_on === -1) {
             let images = this.state.images.slice()
             const category = Number(e.key)-1
             images[category] = this.webcam.getScreenshot()
@@ -324,7 +384,7 @@ class KinderNet extends React.Component{
         }
 
         // test
-        if (e.key.toLowerCase() === "c" || e.key.toLowerCase() === "p") {
+        if ((e.key.toLowerCase() === "c" || e.key.toLowerCase() === "p") && this.state.output_on === -1) {
             this.classifyPic()
             this.setState({timer: 500})
 
@@ -381,19 +441,25 @@ class KinderNet extends React.Component{
                                 quality={1}
                                 className="Webcam"
                             />
-                        <Container align="left">
-                            <p> Aprendido: {Math.floor(100*(1-this.state.loss))}% </p>
-                            <SampleCounter category={this.state.category} n_samples ={this.state.n_samples}/>
                         </Container>
-                        </Container>
+                        <Grid  container justify="right" align="center">
+                            <Grid item sm={5}>
+                                <CircularProgressBar strokeWidth="5" sqSize="100"  percentage={Math.floor(this.state.accuracy*100)}/>
+                            </Grid>
+                            <Grid item sm={6}>
+                                <SampleCounter category={this.state.category} n_samples ={this.state.n_samples}/>
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item sm={8}>
                         <Container>
                             <Network active = {this.state.output_on} onTransitionEnd = {this.handleTransitionEnd}
                                      images = {this.state.images} size = {this.state.net_size} n_outputs = {this.state.category_names.length}
                             classifying = {this.state.classifying}/>
+
                         </Container>
-                    </Grid>
+                        </Grid>
+
                 </Grid>
             </div>
 

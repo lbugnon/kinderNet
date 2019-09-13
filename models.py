@@ -21,11 +21,6 @@ def data2img(data: str) -> Image:
     image_bytes = io.BytesIO(base64.b64decode(data))
     img = Image.open(image_bytes)
 
-    # Crop 25% of the margins (TODO check webcam compat)
-    # w, h = img.size
-    # wc = w//4
-    # hc = h//5
-    # img = img.crop((wc, hc, w-wc, h-hc))
     img = img.resize([128, 128])
     print("Tamaño de imagen guardado", img.size)
     return img
@@ -83,14 +78,14 @@ class Train(Resource):
         save_img(img, category, params["n_samples"][category])
 
         net = KinderNet(params)
-        loss = net.run_train()
+        accuracy = net.run_train()
         net.save()
 
         params["n_samples"][category] += 1
 
         json.dump(params, open(conf_file, "w"))
 
-        return {"loss": loss, "n_samples": params["n_samples"]}
+        return {"accuracy": accuracy, "n_samples": params["n_samples"]}
 
 
 class Classify(Resource):
@@ -119,7 +114,7 @@ class ChangeNet(Resource):
         Change the network complexity and its number of outputs.
         """
         parser = reqparse.RequestParser()
-        parser.add_argument('netSize', type=int, help='Network size (1,2 o 3)')
+        parser.add_argument('net_size', type=int, help='Network size (1,2 o 3)')
         parser.add_argument('n_categories',  help='Number of outputs')
         args = parser.parse_args()
 
@@ -127,10 +122,10 @@ class ChangeNet(Resource):
 
         params = json.load(open(conf_file))
 
-        params_changed = {"net_size": args["netSize"], "n_categories": n_cat, "n_samples": [0 for x in range(n_cat)]}
+        params_changed = {"net_size": args["net_size"], "n_categories": n_cat, "n_samples": [0 for x in range(n_cat)]}
         params.update(params_changed)
 
-        json.dump(params,open(conf_file, "w"))
+        json.dump(params, open(conf_file, "w"))
 
         shutil.rmtree(params["img_dir"])
         os.mkdir(params["img_dir"])

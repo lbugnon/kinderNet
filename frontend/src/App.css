@@ -2,6 +2,12 @@
   text-align: center;
 }
 
+.textBox{
+  fill: white;
+  rx: 10px;
+
+}
+
 .Webcam{
   borderRadius: 10px;
   object-fit: none;
@@ -71,46 +77,46 @@ opacity: 1;
 
 .output-on0 {
   r: 30;
-  fill:  goldenrod;
+  fill:  steelblue;
   transition-duration: .3s;
 }
 .neuron-on0 {
-  fill: goldenrod;
+  fill: steelblue;
   transition-duration: .3s;
 }
 .line-on1{
-  stroke: goldenrod;
+  stroke: steelblue;
   stroke-width: 3px;
   transition-duration: .3s;
 }
 
 
 .line-on2{
-  stroke: goldenrod;
+  stroke: steelblue;
   stroke-width: 3px;
   transition-duration: .5s;
   transition-delay: .2s;
 }
 .output-on1 {
   r: 30;
-  fill:  goldenrod;
+  fill:  steelblue;
   transition-duration: .5s;
   transition-delay: .2s;
 }
 .neuron-on1 {
-  fill:  goldenrod;
+  fill:  steelblue;
   transition-duration: .5s;
   transition-delay: .2s;
 }
 
 .output-on2 {
   r: 30;
-  fill:  goldenrod;
+  fill:  steelblue;
   transition-delay: .5s;
   transition-duration: .3s;
 }
 .neuron-on2 {
-  fill:  goldenrod;
+  fill:  steelblue;
   transition-duration: .5s;
   transition-delay: .2s;
 }
@@ -131,7 +137,7 @@ opacity: 1;
 
 .switch-on{
   transition-duration: .3s;
-  fill: goldenrod;
+  fill: steelblue;
 }
 
 .switch-base{
@@ -153,7 +159,7 @@ opacity: 1;
 }
 
 .switch-base-on{
-  fill: palegoldenrod;
+  fill: palesteelblue;
   transition-duration: .2s;
 }
 
@@ -180,27 +186,33 @@ opacity: 1;
 }
 
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.#app {
+  margin-top: 40px;
 }
 
-.App-link {
-  color: #61dafb;
+#progressInput {
+  margin: 20px auto;
+  width: 30%;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/*Taken from https://codepen.io/bbrady/pen/ozrjKE*/
+.circle-background,
+.circle-progress {
+  fill: none;
 }
 
+.circle-background {
+  stroke: #ddd;
+}
+
+.circle-progress {
+  stroke: steelblue;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.circle-text {
+  font-size: 2em;
+  font-weight: bold;
+  fill: steelblue;
+}
