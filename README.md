@@ -47,3 +47,7 @@ Desde la carpeta raiz del repositorio:
 - "a" y "z": Cambia la cantidad de salidas.
 - "+" y "-": Cambia el tamaño de la red.
 - "c": Clasifica la entrada actual. Por defecto luego de 4 segundos se activa la clasificación automáticamente. 
+
+## TODO
+- agregar controles en la imagen
+- hacer actividades diferenciales para primaria/secundaria
