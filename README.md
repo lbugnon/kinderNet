@@ -4,7 +4,6 @@ Este repositorio es un proyecto de aplicación web para aprender sobre redes neu
 
 DISCLAIMER: La aplicación fue diseñada para correr en la misma PC, en un servidor local. Para hacer un servicio web que esté disponible online es necesario cumplir otros requisitos. También nos queda una lista de cosas para hacer y mejorar, pero nos aseguramos que este código es funcional en varias PCs.
 
-*Autores (por orden alfabético): L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C. Yones.*   
 ### Instalación
 Desde la carpeta raiz del repositorio:
 1. Instalación del servidor
@@ -51,3 +50,4 @@ Desde la carpeta raiz del repositorio:
 - "+" y "-": Cambia el tamaño de la red.
 - "c": Clasifica la entrada actual. Por defecto luego de 4 segundos se activa la clasificación automáticamente. 
 
+Contribuidores (por orden alfabético): L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C. Yones.   
