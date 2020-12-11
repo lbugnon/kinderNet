@@ -1,6 +1,6 @@
-flask
-flask_restful
-flask_cors
-torch
-torchvision
-numpy
+flask==1.1.2
+flask_restful==0.3.8
+flask_cors==3.0.9
+torch==1.2.0
+torchvision==0.4
+numpy==1.16.4
