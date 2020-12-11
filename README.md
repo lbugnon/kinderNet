@@ -1,15 +1,18 @@
 ﻿##### [sinc(i)](http://www.sinc.unl.edu.ar) - Instituto de Investigación en Señales, Sistemas e Inteligencia Computacional.
 ## KinderNet
-Este repositorio es un proyecto de aplicación web para aprender sobre redes neuronales con alumnos de primaria/secundaria. El objetivo es que la aplicación sea interactiva y puedan jugar y experimentar con el proceso de entrenamiento y prueba de algoritmos de aprendizaje automático. 
+Este repositorio es un proyecto de aplicación web para aprender sobre redes neuronales con alumnos de primaria y secundaria. El objetivo es que la aplicación sea interactiva y lo alumnos puedan jugar y experimentar con el proceso de entrenamiento y prueba de redes neuronales para reconocer imágenes usando una pc y una cámara web.
+
+DISCLAIMER: La aplicación fue diseñada para correr en la misma PC, en un servidor local. Para hacer un servicio web que esté disponible online es necesario cumplir otros requisitos. 
 
 *Autores (por orden alfabético): L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C. Yones.*   
 ### Instalación
 Desde la carpeta raiz del repositorio:
 1. Instalación del servidor
     
-    1.1 Instalar [Python>=3.5](https://www.python.org/downloads/). 
+    1.1 Instalar [Python>=3.6](https://www.python.org/downloads/). 
 
-    1.2 Instalar los modulos de Python.
+    1.2 Instalar los modulos de Python, dependiendo de la distribución de Python que uses:
+    
     Con pip:
     ```bash
     python -m pip install --user -r requirements.txt
@@ -20,7 +23,7 @@ Desde la carpeta raiz del repositorio:
     ```
     En caso de que surjan errores en la instalación del paquete torch con los repositorios tradicionales (pip o conda), seguir las instrucciones para su sistema operativo en [https://pytorch.org/](https://pytorch.org/).
     
-2. Instalación de la interfaz de usuario:
+2. Instalación de la interfaz gráfica (que será mediante un navegador web):
     
     2.1 Instalar [node.js](https://nodejs.org/en/download/).
 
@@ -29,7 +32,7 @@ Desde la carpeta raiz del repositorio:
     npm --prefix frontend/ install react-scripts react-webcam @material-ui/core
     ```
 
-3. Explorador web: Por lo pronto funciona bien en Chrome/Chromium > 76 y Opera > 69. En Firefox y Edge esta fallando el dibujo SVG. En IE no anda. 
+3. Explorador web: Por lo pronto funciona bien en Chrome/Chromium > 76 y Opera > 69. En Firefox y Edge esta fallando el dibujo SVG. En IE no anda directamente. 
 
 ## Levantar la aplicación (en "modo rápido")
 - Levantar el servidor: desde el directorio raiz del proyecto ejecutar 
