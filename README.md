@@ -1,8 +1,8 @@
 ﻿##### [sinc(i)](http://www.sinc.unl.edu.ar) - Instituto de Investigación en Señales, Sistemas e Inteligencia Computacional.
 ## KinderNet
-Este repositorio es un proyecto de aplicación web para aprender sobre redes neuronales con alumnos de primaria y secundaria. El objetivo es que la aplicación sea interactiva y lo alumnos puedan jugar y experimentar con el proceso de entrenamiento y prueba de redes neuronales para reconocer imágenes usando una pc y una cámara web.
+Este repositorio es un proyecto de aplicación web para aprender sobre redes neuronales con alumnos de primaria y secundaria. El objetivo es que los alumnos puedan entrenar su propia red neuronal para reconocer objetos que se presenten a la camara web, de una forma interactiva. Los alumnos puedan jugar y experimentar con el proceso de entrenamiento y prueba de redes neuronales, cambiando el tamaño de la red, cantidad y tipos de clases.
 
-DISCLAIMER: La aplicación fue diseñada para correr en la misma PC, en un servidor local. Para hacer un servicio web que esté disponible online es necesario cumplir otros requisitos. 
+DISCLAIMER: La aplicación fue diseñada para correr en la misma PC, en un servidor local. Para hacer un servicio web que esté disponible online es necesario cumplir otros requisitos. También nos queda una lista de cosas para hacer y mejorar, pero nos aseguramos que este código es funcional en varias PCs.
 
 *Autores (por orden alfabético): L. Bugnon, D. Milone, J. Raad, G. Stegmayer, C. Yones.*   
 ### Instalación
@@ -51,6 +51,3 @@ Desde la carpeta raiz del repositorio:
 - "+" y "-": Cambia el tamaño de la red.
 - "c": Clasifica la entrada actual. Por defecto luego de 4 segundos se activa la clasificación automáticamente. 
 
-## TODO
-- agregar controles en la imagen
-- hacer actividades diferenciales para primaria/secundaria
